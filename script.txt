@@ -1,0 +1,14 @@
+# page to config automoderator
+# send a mod mail to mods if a post is made that seems to be about the subreddit
+title: [this subreddit, meta, mods, moderators]
+modmail: |
+    A submission that appears to be about the subreddit has been made by /u/{{author}}.
+
+    **Title:** {{title}}
+--- #end rule
+#definition prompt trial
+body+title (includes-word): [ "[[Demisexuality]]" ] #check for [[Demisexuality]] in comments
+moderators_exempt: false #mods need definitions too
+ignore_blockquotes: true #don't define Demisexuality again when someone quotes it
+comment: |
+    According to AVENwiki, a demisexual is "a person who does not experience sexual attraction unless they form a strong emotional connection with someone.
