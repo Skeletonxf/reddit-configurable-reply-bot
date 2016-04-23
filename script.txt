@@ -30,9 +30,16 @@ modmail: |
 --- #end rule
 
 # Trigger for Demisexaulity definition
-body+title (includes-word): [ "[[Demisexuality]]" ] #check for [[Demisexuality]] in comments
+body+title (includes-word): [ "[[Demisexuality]]", "[[Demisexual]]" ] #check for [[Demisexuality]] in comments
 moderators_exempt: false #mods need definitions too
 ignore_blockquotes: true #don't define Demisexuality again when someone quotes it
 comment: |
-    A demisexual is a person who may experience sexual attraction but only after forming a strong emotion connection with someone.
+    A demisexual is a person who may experience sexual attraction but only after forming a strong emotion connection with someone. [Learn More](https://www.reddit.com/r/demisexuality/comments/2osqfz/links_and_resources_masterpost/)
+--- 
+# Asexuality
+body+title (includes-word): [ "[[Asexuality]]", "[[Asexual]]" ]
+moderators_exempt: false
+ignore_blockquotes: true
+comment: |
+    An asexual is a person who does not experience sexual attraction. [Learn More](http://www.asexuality.org/home/?q=overview.html)
 --- 
