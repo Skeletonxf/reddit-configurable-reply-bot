@@ -43,3 +43,10 @@ ignore_blockquotes: true
 comment: |
     An asexual is a person who does not experience sexual attraction. [Learn More](http://www.asexuality.org/home/?q=overview.html)
 --- 
+# Gray-A
+body+title (includes-word): [ "[[Gray-Asexuality]]", "[[Gray-A]]", "[[Graysexual]]", "[[Grey-Asexuality]]", "[[Grey-A]]", "[[Greysexual]]", ]
+moderators_exempt: false
+ignore_blockquotes: true
+comment: | 
+    A grey-asexual is a person in the spectrum on sexual attraction. It can be used as an umbrella term for those who do not feel they fit as allosexual or asexual. [Learn More](http://www.asexuality.org/wiki/index.php?title=Gray-A_/_Grey-A)
+---
