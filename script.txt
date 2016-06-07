@@ -48,5 +48,5 @@ body+title (includes-word): [ "[[Gray-Asexuality]]", "[[Gray-A]]", "[[Graysexual
 moderators_exempt: false
 ignore_blockquotes: true
 comment: | 
-    A grey-asexual is a person in the spectrum on sexual attraction. It can be used as an umbrella term for those who do not feel they fit as allosexual or asexual. [Learn More](http://www.asexuality.org/wiki/index.php?title=Gray-A_/_Grey-A)
+    A grey-asexual is a person at neither end of the spectrum on (a)sexual attraction. It can be used as an umbrella term for those who do not feel they fit as allosexual or asexual. [Learn More](http://www.asexuality.org/wiki/index.php?title=Gray-A_/_Grey-A)
 ---
