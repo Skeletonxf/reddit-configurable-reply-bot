@@ -50,3 +50,11 @@ ignore_blockquotes: true
 comment: | 
     A grey-asexual is a person at neither end of the spectrum on (a)sexual attraction. It can be used as an umbrella term for those who do not feel they fit as allosexual or asexual. [Learn More](http://www.asexuality.org/wiki/index.php?title=Gray-A_/_Grey-A)
 ---
+--- 
+# Autochorissexual
+body+title (includes-word): [ "[[Autochorisexuality]]", "[[Autochoris]]", "[[Autochorisexual]]", "[[Autochorissexual]]", "[[Autochorissexuality]]", ]
+moderators_exempt: false
+ignore_blockquotes: true
+comment: | 
+    An autochorisexual person is in a subset of asexuality where there is a disconnect between oneself and a sexual target/object. For example a lack of desire to be a participant in sexual activies though still fantastising about sex.  [Learn More](http://asexuals.wikia.com/wiki/Autochorissexual)
+---
