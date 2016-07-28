@@ -28,7 +28,7 @@ from config_bot import * # get user and pass
     SOFTWARE.
 '''
 
-END_OF_REPLY_MSG = "/n I'm a bot and this message was performed automatically. Contact /u/skeletonxf for issues. I'm also [open source](https://github.com/Skeletonxf/reddit-sexuality-definition-bot)"
+END_OF_REPLY_MSG = "\n\n I'm a bot and this message was performed automatically. Contact /u/skeletonxf for issues. I'm also [open source](https://github.com/Skeletonxf/reddit-sexuality-definition-bot)"
 
 # Check that the file that contains our username exists
 if not os.path.isfile("config_bot.py"):
@@ -84,8 +84,8 @@ for submission in subreddit.get_hot(limit=5):
     for comment in comments:
         flag_replied = replyToComment(comment,["[[Demisexuality]]", "[[Demisexual]]"],"A demisexual is a person who may experience sexual attraction but only after forming a strong emotion connection with someone. [Learn More](https://www.reddit.com/r/demisexuality/comments/2osqfz/links_and_resources_masterpost/)",flag_replied)
         flag_replied = replyToComment(comment,["[[Asexuality]]", "[[Asexual]]"],"An asexual is a person who does not experience sexual attraction. [Learn More](http://www.asexuality.org/home/?q=overview.html)",flag_replied)
-        flag_replied = replyToComment(comment,["[[Gray-Asexuality]]", "[[Gray-A]]", "[[Graysexual]]", "[[Grey-Asexuality]]", "[[Grey-A]]", "[[Greysexual]]",],"A grey-asexual is a person at neither end of the spectrum on (a)sexual attraction. It can be used as an umbrella term for those who do not feel they fit as allosexual or asexual. [Learn More](http://www.asexuality.org/wiki/index.php?title=Gray-A_/_Grey-A)",flag_replied)
-        flag_replied = replyToComment(comment,["[[Autochorisexuality]]", "[[Autochoris]]", "[[Autochorisexual]]", "[[Autochorissexual]]", "[[Autochorissexuality]]"],"An autochorisexual person is in a subset of asexuality where there is a disconnect between oneself and a sexual target/object. For example a lack of desire to be a participant in sexual activies though still fantastising about sex. [Learn More](http://asexuals.wikia.com/wiki/Autochorissexual)",flag_replied)
+        flag_replied = replyToComment(comment,["[[Gray Asexuality]]", "[[Gray A]]", "[[Graysexual]]", "[[Grey Asexuality]]", "[[Grey A]]", "[[Greysexual]]"],"A grey asexual is a person at neither end of the spectrum on (a)sexual attraction. It can be used as an umbrella term for those who do not feel they fit as allosexual or asexual. [Learn More](http://www.asexuality.org/wiki/index.php?title=Gray-A_/_Grey-A)",flag_replied)
+        flag_replied = replyToComment(comment,["[[Autochorisexuality]]", "[[Autochoris]]", "[[Autochorisexual]]", "[[Autochorissexual]]", "[[Autochorissexuality]]"],"An autochorisexual person is in a subset of asexuality where there is a disconnect between oneself and a sexual target or object. For example a lack of desire to be a participant in sexual activies though still fantastising about sex. [Learn More](http://asexuals.wikia.com/wiki/Autochorissexual)",flag_replied)
     # avoid replying to any more comments after this run
     if flag_replied:
         # Store the comment id into the list
