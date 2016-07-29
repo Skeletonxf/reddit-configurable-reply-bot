@@ -90,39 +90,42 @@ def add_reply_if_valid(comment,triggers,reply,flag):
                         return flag + reply + "\n\n"
     return flag
 
-# Get the top 5 posts from the subreddit
-for subreddit_name in = SUBREDDITS
-subreddit = r.get_subreddit(subreddit_name)
-    for submission in subreddit.get_hot(limit=5):
-        # get the comments
-        comments = praw.helpers.flatten_tree(submission.comments)
-        # flag variable to stay as true if the bot replies to any comments
-        reply_text = ""
-        for comment in comments:
-            # avoid replying in more comments
-            if isinstance(comment, praw.objects.Comment):
-                reply_text = add_reply_if_valid(comment,["\[\[Demisexuality\]\]", "\[\[Demisexual\]\]"],"A demisexual is a person who may experience sexual attraction but only after forming a strong emotion connection with someone. [Learn More](https://www.reddit.com/r/demisexuality/comments/2osqfz/links_and_resources_masterpost/)",reply_text)
-                reply_text = add_reply_if_valid(comment,["\[\[Asexuality\]\]", "\[\[Asexual\]\]"],"An asexual is a person who does not experience sexual attraction. [Learn More](http://www.asexuality.org/home/?q=overview.html)",reply_text)
-                reply_text = add_reply_if_valid(comment,["\[\[Gr[ae]y Asexuality\]\]", "\[\[Gr[ae]y A\]\]", "\[\[Gr[ae]ysexual\]\]"],"A grey asexual is a person at neither end of the spectrum on (a)sexual attraction. It can be used as an umbrella term for those who do not feel they fit as allosexual or asexual. [Learn More](http://www.asexuality.org/wiki/index.php?title=Gray-A_/_Grey-A)",reply_text)
-                reply_text = add_reply_if_valid(comment,["\[\[Autochorisexuality\]\]", "\[\[Autochoris\]\]", "\[\[Autochorisexual\]\]", "\[\[Autochorissexual\]\]", "\[\[Autochorissexuality\]\]"],"An autochorisexual person is in a subset of asexuality where there is a disconnect between oneself and a sexual target or object. For example a lack of desire to be a participant in sexual activies though still fantastising about sex. [Learn More](http://asexuals.wikia.com/wiki/Autochorissexual)",reply_text)
-                # avoid replying to any more comments after this run
-                # if flag_replied is no longer empty
-                if not reply_text == "":
-                    print ("Bot replying to comment: ", comment.id)
-                    # limits on reddit api
-                    try:
-                        comment.reply(reply_text+END_OF_REPLY_MSG)
-                        # Store the comment id into the list
-                        replied_to.append(comment.id)
-                    except praw.errors.RateLimitExceeded as e:
-                        print("Replying too soon!")
-                        print("Waiting " + str(e.sleep_time) + " seconds")
-                        time.sleep(e.sleep_time)
-                        comment.reply(reply_text+END_OF_REPLY_MSG)
-                        replied_to.append(comment.id)
-                    # at most reply once per run
-                    break
+def post_definitions():
+    "Gets the top 5 posts from the subreddit"
+    for subreddit_name in = SUBREDDITS
+    subreddit = r.get_subreddit(subreddit_name)
+        for submission in subreddit.get_hot(limit=5):
+            # get the comments
+            comments = praw.helpers.flatten_tree(submission.comments)
+            # flag variable to stay as true if the bot replies to any comments
+            reply_text = ""
+            for comment in comments:
+                # avoid replying in more comments
+                if isinstance(comment, praw.objects.Comment):
+                    reply_text = add_reply_if_valid(comment,["\[\[Demisexuality\]\]", "\[\[Demisexual\]\]"],"A demisexual is a person who may experience sexual attraction but only after forming a strong emotion connection with someone. [Learn More](https://www.reddit.com/r/demisexuality/comments/2osqfz/links_and_resources_masterpost/)",reply_text)
+                    reply_text = add_reply_if_valid(comment,["\[\[Asexuality\]\]", "\[\[Asexual\]\]"],"An asexual is a person who does not experience sexual attraction. [Learn More](http://www.asexuality.org/home/?q=overview.html)",reply_text)
+                    reply_text = add_reply_if_valid(comment,["\[\[Gr[ae]y Asexuality\]\]", "\[\[Gr[ae]y A\]\]", "\[\[Gr[ae]ysexual\]\]"],"A grey asexual is a person at neither end of the spectrum on (a)sexual attraction. It can be used as an umbrella term for those who do not feel they fit as allosexual or asexual. [Learn More](http://www.asexuality.org/wiki/index.php?title=Gray-A_/_Grey-A)",reply_text)
+                    reply_text = add_reply_if_valid(comment,["\[\[Autochorisexuality\]\]", "\[\[Autochoris\]\]", "\[\[Autochorisexual\]\]", "\[\[Autochorissexual\]\]", "\[\[Autochorissexuality\]\]"],"An autochorisexual person is in a subset of asexuality where there is a disconnect between oneself and a sexual target or object. For example a lack of desire to be a participant in sexual activies though still fantastising about sex. [Learn More](http://asexuals.wikia.com/wiki/Autochorissexual)",reply_text)
+                    # avoid replying to any more comments after this run
+                    # if flag_replied is no longer empty
+                    if not reply_text == "":
+                        print ("Bot replying to comment: ", comment.id)
+                        # limits on reddit api
+                        try:
+                            comment.reply(reply_text+END_OF_REPLY_MSG)
+                            # Store the comment id into the list
+                            replied_to.append(comment.id)
+                        except praw.errors.RateLimitExceeded as e:
+                            print("Replying too soon!")
+                            print("Waiting " + str(e.sleep_time) + " seconds")
+                            time.sleep(e.sleep_time)
+                            comment.reply(reply_text+END_OF_REPLY_MSG)
+                            replied_to.append(comment.id)
+                        # at most reply once per run
+                        return
 
+post_definitions()
+                        
 print("finished looking at comments")
 
 print("writing replies to file")
