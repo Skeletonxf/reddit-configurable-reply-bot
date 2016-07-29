@@ -64,12 +64,30 @@ else:
 print("about to search for comments to reply to")
 
 def add_reply_if_valid(comment,triggers,reply,flag):
-    "This checks for a comment in the comments to reply to and then replies"
+    "This checks for a comment in the comments to reply to and then replies avoiding quotes"
     if comment.id not in replied_to:
         for trigger in triggers:
             # search using regex for the trigger in the comment body
-            if re.search(trigger,comment.body,re.IGNORECASE):           
-                return flag + reply + " /n/n "
+            for specific_trigger in re.finditer(trigger,comment.body,re.IGNORECASE):
+                # splice substring going from comment body start to the trigger text location
+                sub_comment = comment.body[:specific_trigger.start()]
+                last_line_break = -1
+                last_quote = -1
+                # loop through substring looking for occurances of newlines
+                for line_break in re.finditer("\n\n",sub_comment):
+                    last_line_break = line_break.start()
+                
+                # loop through substring looking for occurances of reddit quotes starting
+                for quote in re.finditer("> ",sub_comment):
+                    last_quote = quote.start()
+                
+                # if user's comment has no quotes in
+                if last_quote == -1:
+                    return flag + reply + "\n\n"
+                else:
+                    # if user's comment has quotes in but the quote ends before the trigger keyword
+                    if not last_line_break == -1 and last_line_break > last_quote:
+                        return flag + reply + "\n\n"
     return flag
 
 # Get the top 5 posts from the subreddit
@@ -80,10 +98,10 @@ for submission in subreddit.get_hot(limit=5):
     # flag variable to stay as true if the bot replies to any comments
     reply_text = ""
     for comment in comments:
-        reply_text = add_reply_if_valid(comment,["[[Demisexuality]]", "[[Demisexual]]"],"A demisexual is a person who may experience sexual attraction but only after forming a strong emotion connection with someone. [Learn More](https://www.reddit.com/r/demisexuality/comments/2osqfz/links_and_resources_masterpost/)",reply_text)
-        reply_text = add_reply_if_valid(comment,["[[Asexuality]]", "[[Asexual]]"],"An asexual is a person who does not experience sexual attraction. [Learn More](http://www.asexuality.org/home/?q=overview.html)",reply_text)
-        reply_text = add_reply_if_valid(comment,["[[Gray Asexuality]]", "[[Gray A]]", "[[Graysexual]]", "[[Grey Asexuality]]", "[[Grey A]]", "[[Greysexual]]"],"A grey asexual is a person at neither end of the spectrum on (a)sexual attraction. It can be used as an umbrella term for those who do not feel they fit as allosexual or asexual. [Learn More](http://www.asexuality.org/wiki/index.php?title=Gray-A_/_Grey-A)",reply_text)
-        reply_text = add_reply_if_valid(comment,["[[Autochorisexuality]]", "[[Autochoris]]", "[[Autochorisexual]]", "[[Autochorissexual]]", "[[Autochorissexuality]]"],"An autochorisexual person is in a subset of asexuality where there is a disconnect between oneself and a sexual target or object. For example a lack of desire to be a participant in sexual activies though still fantastising about sex. [Learn More](http://asexuals.wikia.com/wiki/Autochorissexual)",reply_text)
+        reply_text = add_reply_if_valid(comment,["\[\[Demisexuality\]\]", "\[\[Demisexual\]\]"],"A demisexual is a person who may experience sexual attraction but only after forming a strong emotion connection with someone. [Learn More](https://www.reddit.com/r/demisexuality/comments/2osqfz/links_and_resources_masterpost/)",reply_text)
+        reply_text = add_reply_if_valid(comment,["\[\[Asexuality\]\]", "\[\[Asexual\]\]"],"An asexual is a person who does not experience sexual attraction. [Learn More](http://www.asexuality.org/home/?q=overview.html)",reply_text)
+        reply_text = add_reply_if_valid(comment,["\[\[Gr[ae]y Asexuality\]\]", "\[\[Gr[ae]y A\]\]", "\[\[Gr[ae]ysexual\]\]"],"A grey asexual is a person at neither end of the spectrum on (a)sexual attraction. It can be used as an umbrella term for those who do not feel they fit as allosexual or asexual. [Learn More](http://www.asexuality.org/wiki/index.php?title=Gray-A_/_Grey-A)",reply_text)
+        reply_text = add_reply_if_valid(comment,["\[\[Autochorisexuality\]\]", "\[\[Autochoris\]\]", "\[\[Autochorisexual\]\]", "\[\[Autochorissexual\]\]", "\[\[Autochorissexuality\]\]"],"An autochorisexual person is in a subset of asexuality where there is a disconnect between oneself and a sexual target or object. For example a lack of desire to be a participant in sexual activies though still fantastising about sex. [Learn More](http://asexuals.wikia.com/wiki/Autochorissexual)",reply_text)
         # avoid replying to any more comments after this run
         # if flag_replied is no longer empty
         if not reply_text == "":
