@@ -31,6 +31,7 @@ from config_bot import * # get user and pass
 
 END_OF_REPLY_MSG = "\n\n I'm a bot and this message was performed automatically. Contact /u/skeletonxf for issues. I'm also [open source](https://github.com/Skeletonxf/reddit-sexuality-definition-bot)"
 
+
 # Check that the file that contains our username exists
 if not os.path.isfile("config_bot.py"):
     print ("You must create a config file with your username and password.")
@@ -92,8 +93,8 @@ def add_reply_if_valid(comment,triggers,reply,flag):
 
 def post_definitions():
     "Gets the top 5 posts from the subreddit"
-    for subreddit_name in = SUBREDDITS
-    subreddit = r.get_subreddit(subreddit_name)
+    for subreddit_name in SUBREDDITS:
+        subreddit = r.get_subreddit(subreddit_name)
         for submission in subreddit.get_hot(limit=5):
             # get the comments
             comments = praw.helpers.flatten_tree(submission.comments)
