@@ -4,6 +4,9 @@ extern crate rawr;
 use rawr::auth::PasswordAuthenticator;
 use rawr::client::RedditClient;
 use rawr::structures::subreddit::Subreddit;
+use rawr::structures::submission::Submission;
+use rawr::traits::Commentable;
+use rawr::traits::Editable;
 use rawr::options::ListingOptions;
 
 use std::fs::File;
@@ -52,6 +55,27 @@ fn get_subreddits(client: &RedditClient) -> Vec<Subreddit> {
     list
 }
 
+//fn respond_to(string : &str) will call lua code on contents of some Commentable
+
+fn search_post(post: Submission) {
+    // make a copy of the title to continue referring to after post is consumed
+    let title = String::from(post.title()).clone();
+    if post.is_self_post() {
+        // will always be safe to unwrap the body in self posts
+        println!("Post '{}' contents:\n{}\n", title, post.body().unwrap());
+    }
+    // give the post to `replies` which will consume it
+    let comments = post.replies();
+    if comments.is_ok() {
+        let comments = comments.unwrap().take(100);
+        for comment in comments {
+            println!("Comment in '{}':\n{}\n", title, comment.body().unwrap())
+        }
+    } else {
+        println!("APIError on post {}", title);
+    }
+}
+
 fn main() {
     let client = get_client();
     let subreddits = get_subreddits(&client);
@@ -63,6 +87,8 @@ fn main() {
         if hot.is_ok() {
             for post in hot.unwrap().take(5) {
                 println!("Found '{}' in '{}'", post.title(), subreddit.name);
+                println!();
+                search_post(post)
             }
         } else {
             println!("APIError on subreddit {}", subreddit.name);
