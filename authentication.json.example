@@ -1,0 +1,9 @@
+{
+    "id" : "app_id",
+    "secret" : "app_secret",
+    "username" : "account_to_use_in_bot",
+    "password" : "account_to_use_in_bot_password"
+}
+https://www.reddit.com/prefs/apps/
+This is an example and should be renamed to authentication.json after filling in
+Also JSON does not support comments so these comments need to be removed as well
