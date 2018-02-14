@@ -3,11 +3,12 @@ extern crate rawr;
 
 use rawr::auth::PasswordAuthenticator;
 use rawr::client::RedditClient;
+use rawr::options::ListingOptions;
+use rawr::structures::comment::Comment;
 use rawr::structures::subreddit::Subreddit;
 use rawr::structures::submission::Submission;
 use rawr::traits::Commentable;
 use rawr::traits::Editable;
-use rawr::options::ListingOptions;
 
 use std::fs::File;
 use std::io::Read;
@@ -57,6 +58,21 @@ fn get_subreddits(client: &RedditClient) -> Vec<Subreddit> {
 
 //fn respond_to(string : &str) will call lua code on contents of some Commentable
 
+// recurses through the comment tree
+fn recurse_on_comment(title: &str, comment: Comment) {
+    // print out comment and post title
+    println!("Comment in '{}':\n{}\n", title, comment.body().unwrap());
+    // TODO handle replying to comment
+    let replies = comment.replies();
+    if replies.is_ok() {
+        for reply in replies.unwrap().take(10) {
+            recurse_on_comment(title, reply);
+        }
+    } else {
+        println!("APIError on nested comment"); // TODO better debugging info
+    }
+}
+
 fn search_post(post: Submission) {
     // make a copy of the title to continue referring to after post is consumed
     let title = String::from(post.title()).clone();
@@ -69,7 +85,9 @@ fn search_post(post: Submission) {
     if comments.is_ok() {
         let comments = comments.unwrap().take(100);
         for comment in comments {
-            println!("Comment in '{}':\n{}\n", title, comment.body().unwrap())
+            // deref the String to pass to the recurse with the ampersand
+            recurse_on_comment(&title, comment);
+            //println!("Comment in '{}':\n{}\n", &title, comment.body().unwrap())
         }
     } else {
         println!("APIError on post {}", title);
