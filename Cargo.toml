@@ -4,5 +4,9 @@ version = "0.1.0"
 authors = ["Skeletonxf <skeletonxf@gmail.com>"]
 
 [dependencies]
+# reddit api
 rawr = "0.1.1"
+# json parsing
 json = "0.11.13"
+# lua scripting
+rlua = "0.11.0"
