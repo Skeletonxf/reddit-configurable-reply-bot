@@ -9,18 +9,19 @@ use rawr::structures::subreddit::Subreddit;
 
 use rlua::Lua;
 
+use std::error::Error;
 use std::fs::File;
-use std::process;
 use std::io::Read;
-use std::io;
+use std::process;
 
 use json::JsonValue;
 
-fn read_file(name: &str) -> Result<String, io::Error> {
+fn read_json(name: &str) -> Result<JsonValue, Box<Error>> {
     let mut file = File::open(name)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
-    Ok(contents)
+    let parsed = json::parse(&contents)?;
+    Ok(parsed)
 }
 
 /// Produces the RedditClient from the authentication data
@@ -57,22 +58,14 @@ fn main() {
     //);
     //fn respond_to(string : &str) will call lua code on contents of some Commentable
 
-    let authentication_data = read_file("authentication.json").unwrap_or_else(|e| {
-        println!("Problem reading authentication data: {}", e);
+    let authentication_data = read_json("authentication.json").unwrap_or_else(|e| {
+        println!("Problem with authentication data: {}", e);
         process::exit(1);
     });
-    let json_authentication_data = json::parse(&authentication_data).unwrap_or_else(|e| {
-        println!("Problem parsing authentication data: {}", e);
-        process::exit(1);
-    });
-    let client = get_client(json_authentication_data);
+    let client = get_client(authentication_data);
 
-    let subreddits_data = read_file("subreddits.json").unwrap_or_else(|e| {
-        println!("Problem reading subreddits data: {}", e);
-        process::exit(1);
-    });
-    let json_subreddits_data = json::parse(&subreddits_data).unwrap_or_else(|e| {
-        println!("Problem parsing subreddits data: {}", e);
+    let json_subreddits_data = read_json("subreddits.json").unwrap_or_else(|e| {
+        println!("Problem with subreddits data: {}", e);
         process::exit(1);
     });
     let subreddits = get_subreddits(json_subreddits_data, &client);
