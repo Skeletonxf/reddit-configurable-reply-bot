@@ -1,4 +1,5 @@
 extern crate rawr;
+extern crate rlua;
 
 use rawr::options::ListingOptions;
 use rawr::structures::comment::Comment;
@@ -6,6 +7,8 @@ use rawr::structures::subreddit::Subreddit;
 use rawr::structures::submission::Submission;
 use rawr::traits::Commentable;
 use rawr::traits::Editable;
+
+use rlua::Lua;
 
 // recurses through the comment tree
 fn recurse_on_comment(title: &str, comment: Comment) {
@@ -44,7 +47,18 @@ fn search_post(post: Submission) {
 }
 
 // runs the comment search and reply
-pub fn run(subreddits: Vec<Subreddit>) {
+pub fn run(subreddits: Vec<Subreddit>, behaviour: &str) -> Result<(), rlua::Error> {
+    // create a lua instance to define comment reply behaviour
+    let lua = Lua::new();
+
+    // run the code and take the result as a boolean
+    // this will need changing into the reply string or even a table
+    // specifying further info
+    // or the lua state needs to be given a global function from rust
+    // that performs the reply
+    let result = lua.eval::<bool>(behaviour, Some("testing the script"))?;
+    println!("Result of lua code {}", result);
+
     for subreddit in subreddits {
         let about = subreddit.about();
         if about.is_ok() {
@@ -63,4 +77,5 @@ pub fn run(subreddits: Vec<Subreddit>) {
             println!("APIError on subreddit {}", subreddit.name);
         }
     }
+    Ok(())
 }

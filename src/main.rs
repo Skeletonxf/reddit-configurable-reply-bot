@@ -1,25 +1,28 @@
 extern crate json;
 extern crate rawr;
-extern crate rlua;
 extern crate sexuality_def_bot;
 
 use rawr::auth::PasswordAuthenticator;
 use rawr::client::RedditClient;
 use rawr::structures::subreddit::Subreddit;
 
-use rlua::Lua;
-
 use std::error::Error;
 use std::fs::File;
 use std::io::Read;
+use std::io;
 use std::process;
 
 use json::JsonValue;
 
-fn read_json(name: &str) -> Result<JsonValue, Box<Error>> {
+fn read_file(name: &str) -> Result<String, io::Error> {
     let mut file = File::open(name)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
+    Ok(contents)
+}
+
+fn read_json(name: &str) -> Result<JsonValue, Box<Error>> {
+    let contents = read_file(name)?;
     let parsed = json::parse(&contents)?;
     Ok(parsed)
 }
@@ -40,7 +43,7 @@ fn get_subreddits(data: JsonValue, client: &RedditClient) -> Vec<Subreddit> {
     let mut list = Vec::new();
     for element in data.members() {
         let name = element.as_str().expect(
-            "All elements in subreddits.json array should be strings");
+            "All elements in subreddits.json array should be strings"); // TODO
         list.push(client.subreddit(name));
     }
     println!("{}", data.dump());
@@ -48,16 +51,6 @@ fn get_subreddits(data: JsonValue, client: &RedditClient) -> Vec<Subreddit> {
 }
 
 fn main() {
-    // need to work out how to pass and retrieve values: https://docs.rs/rlua/0.12.2/rlua/struct.Lua.html
-    //let lua = Lua::new();
-    //lua.eval::<()>(
-    //   r#"
-    //   print('hello world')
-    //   "#,
-    //   None,
-    //);
-    //fn respond_to(string : &str) will call lua code on contents of some Commentable
-
     let authentication_data = read_json("authentication.json").unwrap_or_else(|e| {
         println!("Problem with authentication data: {}", e);
         process::exit(1);
@@ -70,5 +63,13 @@ fn main() {
     });
     let subreddits = get_subreddits(json_subreddits_data, &client);
 
-    sexuality_def_bot::run(subreddits);
+    let behaviour = read_file("behaviour.lua").unwrap_or_else(|e| {
+        println!("Problem reading behaviour script: {}", e);
+        process::exit(1);
+    });
+
+    sexuality_def_bot::run(subreddits, &behaviour).unwrap_or_else(|e| {
+        println!("Problem running bot: {}", e);
+        process::exit(1);
+    });;
 }
