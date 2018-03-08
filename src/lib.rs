@@ -10,22 +10,47 @@ use rawr::traits::Editable;
 
 use rlua::Lua;
 
+// invokes the a lua instance on the behaviour script and makes the comment body
+// available to the script
+fn respond_to_comment(comment_body: &str, behaviour: &str) -> Result<bool, rlua::Error> {
+    // create a lua instance to define comment reply behaviour
+    let lua = Lua::new();
+
+    // if this fails then the lua script will not work either
+    lua.globals().set("comment", comment_body).unwrap();
+
+    // run the code and take the result as a boolean
+    // this will need changing into the reply string or even a table
+    // specifying further info
+    // or the lua state needs to be given a global function from rust
+    // that performs the reply
+    let result = lua.eval::<bool>(behaviour, Some("testing the script"))?;
+    Ok(result)
+}
+
 // recurses through the comment tree
-fn recurse_on_comment(title: &str, comment: Comment) {
+fn recurse_on_comment(title: &str, comment: Comment, behaviour: &str) {
     // print out comment and post title
-    println!("Comment in '{}':\n{}\n", title, comment.body().unwrap());
+    let comment_body = comment.body().unwrap(); // safe because this is always a comment
+    println!("Comment in '{}':\n{}\n", title, comment_body);
+
     // TODO handle replying to comment
+    match respond_to_comment(&comment_body, behaviour) {
+        Err(e) => println!("Lua error {}", e),
+        Ok(v) => println!("Lua returned {}", v),
+    }
+
     let replies = comment.replies();
     if replies.is_ok() {
         for reply in replies.unwrap().take(10) {
-            recurse_on_comment(title, reply);
+            recurse_on_comment(title, reply, behaviour);
         }
     } else {
         println!("APIError on nested comment"); // TODO better debugging info
     }
 }
 
-fn search_post(post: Submission) {
+fn search_post(post: Submission, behaviour: &str) {
     // make a copy of the title to continue referring to after post is consumed
     let title = String::from(post.title()).clone();
     if post.is_self_post() {
@@ -38,7 +63,7 @@ fn search_post(post: Submission) {
         let comments = comments.unwrap().take(100);
         for comment in comments {
             // deref the String to pass to the recurse with the ampersand
-            recurse_on_comment(&title, comment);
+            recurse_on_comment(&title, comment, behaviour);
             //println!("Comment in '{}':\n{}\n", &title, comment.body().unwrap())
         }
     } else {
@@ -47,18 +72,7 @@ fn search_post(post: Submission) {
 }
 
 // runs the comment search and reply
-pub fn run(subreddits: Vec<Subreddit>, behaviour: &str) -> Result<(), rlua::Error> {
-    // create a lua instance to define comment reply behaviour
-    let lua = Lua::new();
-
-    // run the code and take the result as a boolean
-    // this will need changing into the reply string or even a table
-    // specifying further info
-    // or the lua state needs to be given a global function from rust
-    // that performs the reply
-    let result = lua.eval::<bool>(behaviour, Some("testing the script"))?;
-    println!("Result of lua code {}", result);
-
+pub fn run(subreddits: Vec<Subreddit>, behaviour: &str) {
     for subreddit in subreddits {
         let about = subreddit.about();
         if about.is_ok() {
@@ -71,11 +85,10 @@ pub fn run(subreddits: Vec<Subreddit>, behaviour: &str) -> Result<(), rlua::Erro
             for post in hot.unwrap().take(5) {
                 println!("Found '{}' in '{}'", post.title(), subreddit.name);
                 println!();
-                search_post(post)
+                search_post(post, behaviour)
             }
         } else {
             println!("APIError on subreddit {}", subreddit.name);
         }
     }
-    Ok(())
 }
