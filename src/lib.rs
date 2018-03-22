@@ -18,7 +18,7 @@ fn respond_to_comment(comment_body: &str) -> Result<bool, rlua::Error> {
 
     let globals = lua.globals();
     
-    // if these fails then the lua script will not work either
+    // if these fail then the lua script will not work either
     globals.set("comment", comment_body).unwrap();
     
     // although the lua code should never need to query contains for anything
@@ -28,7 +28,13 @@ fn respond_to_comment(comment_body: &str) -> Result<bool, rlua::Error> {
     let contains = lua.create_function(|_, (substring1, substring2): (String, String)| {
         Ok(substring1.contains(&substring2))
     })?;
+    // this should be prefered to trying to convert case in lua as
+    // rust handles Unicode properly
+    let contains_ignore_case = lua.create_function(|_, (substring1, substring2): (String, String)| {
+        Ok(substring1.to_lowercase().contains(&substring2.to_lowercase()))
+    })?;
     globals.set("contains", contains)?;
+    globals.set("containsIgnoreCase", contains_ignore_case)?;
     let reply = lua.create_function(|_, comment: String| {
         println!("Totally replying: {}", comment);
         Ok(true)
@@ -72,6 +78,12 @@ fn search_post(post: Submission) {
     if post.is_self_post() {
         // will always be safe to unwrap the body in self posts
         println!("Post '{}' contents:\n{}\n", title, post.body().unwrap());
+        // todo create an enum to identify if comment or post
+        // TODO handle replying to comment
+        match respond_to_comment(&[&title, "\n", &post.body().unwrap()].join("")) {
+            Err(e) => println!("Lua error {}", e),
+            Ok(v) => println!("Lua returned {}", v),
+        }
     }
     // give the post to `replies` which will consume it
     let comments = post.replies();
