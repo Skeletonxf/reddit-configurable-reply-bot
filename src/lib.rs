@@ -12,30 +12,46 @@ use rlua::Lua;
 
 // invokes the a lua instance on the behaviour script and makes the comment body
 // available to the script
-fn respond_to_comment(comment_body: &str, behaviour: &str) -> Result<bool, rlua::Error> {
+fn respond_to_comment(comment_body: &str) -> Result<bool, rlua::Error> {
     // create a lua instance to define comment reply behaviour
     let lua = Lua::new();
 
-    // if this fails then the lua script will not work either
-    lua.globals().set("comment", comment_body).unwrap();
-
+    let globals = lua.globals();
+    
+    // if these fails then the lua script will not work either
+    globals.set("comment", comment_body).unwrap();
+    
+    // although the lua code should never need to query contains for anything
+    // other than the comment body, this function needs to last for a static
+    // lifetime and the comment body does not, so create a more general
+    // contains function that words for any strings
+    let contains = lua.create_function(|_, (substring1, substring2): (String, String)| {
+        Ok(substring1.contains(&substring2))
+    })?;
+    globals.set("contains", contains)?;
+    let reply = lua.create_function(|_, comment: String| {
+        println!("Totally replying: {}", comment);
+        Ok(true)
+    })?;
+    globals.set("reply", reply)?;
+    
     // run the code and take the result as a boolean
     // this will need changing into the reply string or even a table
     // specifying further info
     // or the lua state needs to be given a global function from rust
     // that performs the reply
-    let result = lua.eval::<bool>(behaviour, Some("testing the script"))?;
+    let result = lua.eval::<bool>("return require('behaviour')", Some("testing the script"))?;
     Ok(result)
 }
 
 // recurses through the comment tree
-fn recurse_on_comment(title: &str, comment: Comment, behaviour: &str) {
+fn recurse_on_comment(title: &str, comment: Comment) {
     // print out comment and post title
     let comment_body = comment.body().unwrap(); // safe because this is always a comment
     println!("Comment in '{}':\n{}\n", title, comment_body);
 
     // TODO handle replying to comment
-    match respond_to_comment(&comment_body, behaviour) {
+    match respond_to_comment(&comment_body) {
         Err(e) => println!("Lua error {}", e),
         Ok(v) => println!("Lua returned {}", v),
     }
@@ -43,14 +59,14 @@ fn recurse_on_comment(title: &str, comment: Comment, behaviour: &str) {
     let replies = comment.replies();
     if replies.is_ok() {
         for reply in replies.unwrap().take(10) {
-            recurse_on_comment(title, reply, behaviour);
+            recurse_on_comment(title, reply);
         }
     } else {
         println!("APIError on nested comment"); // TODO better debugging info
     }
 }
 
-fn search_post(post: Submission, behaviour: &str) {
+fn search_post(post: Submission) {
     // make a copy of the title to continue referring to after post is consumed
     let title = String::from(post.title()).clone();
     if post.is_self_post() {
@@ -63,7 +79,7 @@ fn search_post(post: Submission, behaviour: &str) {
         let comments = comments.unwrap().take(100);
         for comment in comments {
             // deref the String to pass to the recurse with the ampersand
-            recurse_on_comment(&title, comment, behaviour);
+            recurse_on_comment(&title, comment);
             //println!("Comment in '{}':\n{}\n", &title, comment.body().unwrap())
         }
     } else {
@@ -72,7 +88,7 @@ fn search_post(post: Submission, behaviour: &str) {
 }
 
 // runs the comment search and reply
-pub fn run(subreddits: Vec<Subreddit>, behaviour: &str) {
+pub fn run(subreddits: Vec<Subreddit>) {
     for subreddit in subreddits {
         let about = subreddit.about();
         if about.is_ok() {
@@ -85,7 +101,7 @@ pub fn run(subreddits: Vec<Subreddit>, behaviour: &str) {
             for post in hot.unwrap().take(5) {
                 println!("Found '{}' in '{}'", post.title(), subreddit.name);
                 println!();
-                search_post(post, behaviour)
+                search_post(post)
             }
         } else {
             println!("APIError on subreddit {}", subreddit.name);

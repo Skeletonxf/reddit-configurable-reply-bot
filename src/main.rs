@@ -63,10 +63,5 @@ fn main() {
     });
     let subreddits = get_subreddits(json_subreddits_data, &client);
 
-    let behaviour = read_file("behaviour.lua").unwrap_or_else(|e| {
-        println!("Problem reading behaviour script: {}", e);
-        process::exit(1);
-    });
-
-    sexuality_def_bot::run(subreddits, &behaviour);
+    sexuality_def_bot::run(subreddits);
 }
