@@ -17,10 +17,10 @@ fn respond_to_comment(comment_body: &str) -> Result<bool, rlua::Error> {
     let lua = Lua::new();
 
     let globals = lua.globals();
-    
+
     // if these fail then the lua script will not work either
     globals.set("comment", comment_body).unwrap();
-    
+
     // although the lua code should never need to query contains for anything
     // other than the comment body, this function needs to last for a static
     // lifetime and the comment body does not, so create a more general
@@ -40,7 +40,7 @@ fn respond_to_comment(comment_body: &str) -> Result<bool, rlua::Error> {
         Ok(true)
     })?;
     globals.set("reply", reply)?;
-    
+
     // run the code and take the result as a boolean
     // this will need changing into the reply string or even a table
     // specifying further info

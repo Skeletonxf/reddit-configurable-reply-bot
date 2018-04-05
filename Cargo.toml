@@ -6,6 +6,8 @@ authors = ["Skeletonxf <skeletonxf@gmail.com>"]
 [dependencies]
 # reddit api
 rawr = "0.1.1"
+# sqlite db
+rusqlite = "0.13.0"
 # json parsing
 json = "0.11.13"
 # lua scripting

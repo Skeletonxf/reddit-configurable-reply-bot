@@ -1,10 +1,13 @@
 extern crate json;
 extern crate rawr;
+extern crate rusqlite;
 extern crate sexuality_def_bot;
 
 use rawr::auth::PasswordAuthenticator;
 use rawr::client::RedditClient;
 use rawr::structures::subreddit::Subreddit;
+
+use rusqlite::Connection;
 
 use std::error::Error;
 use std::fs::File;
@@ -62,6 +65,11 @@ fn main() {
         process::exit(1);
     });
     let subreddits = get_subreddits(json_subreddits_data, &client);
+
+    let connection = Connection::open_in_memory().unwrap_or_else(|e| {
+        println!("Problem with opening SQL database: {}", e);
+        process::exit(1);
+    });
 
     sexuality_def_bot::run(subreddits);
 }
