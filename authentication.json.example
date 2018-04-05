@@ -5,5 +5,6 @@
     "password" : "account_to_use_in_bot_password"
 }
 https://www.reddit.com/prefs/apps/
+See id_and_secret_fields.png for getting the id and secret
 This is an example and should be renamed to authentication.json after filling in
 Also JSON does not support comments so these comments need to be removed as well
