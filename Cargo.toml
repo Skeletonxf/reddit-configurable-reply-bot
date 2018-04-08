@@ -11,4 +11,6 @@ rusqlite = "0.13.0"
 # json parsing
 json = "0.11.13"
 # lua scripting
-rlua = "0.11.0"
+rlua = "0.12.0"
+# converting to std::error::Error types for rlua
+failure = "0.1.1"

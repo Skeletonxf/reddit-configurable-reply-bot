@@ -1,3 +1,4 @@
+extern crate failure;
 extern crate json;
 extern crate rawr;
 extern crate sexuality_def_bot;
@@ -6,7 +7,8 @@ use rawr::auth::PasswordAuthenticator;
 use rawr::client::RedditClient;
 use rawr::structures::subreddit::Subreddit;
 
-use std::error::Error;
+//use std::error::Error;
+use failure::Error;
 use std::fs::File;
 use std::io::Read;
 use std::io;
@@ -21,7 +23,7 @@ fn read_file(name: &str) -> Result<String, io::Error> {
     Ok(contents)
 }
 
-fn read_json(name: &str) -> Result<JsonValue, Box<Error>> {
+fn read_json(name: &str) -> Result<JsonValue, Error> {
     let contents = read_file(name)?;
     let parsed = json::parse(&contents)?;
     Ok(parsed)
@@ -52,24 +54,24 @@ fn get_subreddits(data: JsonValue, client: &RedditClient) -> Vec<Subreddit> {
 
 fn main() {
     let authentication_data = read_json("authentication.json").unwrap_or_else(|e| {
-        println!("Problem with authentication data: {}", e);
+        eprintln!("Problem with authentication data: {}", e);
         process::exit(1);
     });
     let client = get_client(authentication_data);
 
     let json_subreddits_data = read_json("subreddits.json").unwrap_or_else(|e| {
-        println!("Problem with subreddits data: {}", e);
+        eprintln!("Problem with subreddits data: {}", e);
         process::exit(1);
     });
     let subreddits = get_subreddits(json_subreddits_data, &client);
 
     let database = sexuality_def_bot::db::from_connection("db.sqlite").unwrap_or_else(|e| {
-        println!("Problem with SQL database: {}", e);
+        eprintln!("Problem with SQL database: {}", e);
         process::exit(1);
     });
 
     sexuality_def_bot::run(subreddits, &database).unwrap_or_else(|e| {
-        println!("Problem running bot: {}", e);
+        eprintln!("Problem running bot: {}", e);
         process::exit(1);
     });
 }
