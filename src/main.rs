@@ -68,5 +68,8 @@ fn main() {
         process::exit(1);
     });
 
-    sexuality_def_bot::run(subreddits, &database);
+    sexuality_def_bot::run(subreddits, &database).unwrap_or_else(|e| {
+        println!("Problem running bot: {}", e);
+        process::exit(1);
+    });
 }

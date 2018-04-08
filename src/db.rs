@@ -14,12 +14,20 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn replied(&self, content: &Content) -> bool {
-        false
+    pub fn replied(&self, content: &Content) -> Result<bool, rusqlite::Error> {
+        let id = content.name();
+        let found: i32 = try!(self.connection.query_row(
+            "SELECT EXISTS (
+                SELECT 1 FROM replies WHERE id = ?1 LIMIT 1
+            )", &[&id], |r| r.get(0))
+        );
+        Ok(found == 1)
     }
 
-    pub fn reply(&self, content: &Content) {
+    pub fn reply(&self, content: &Content) -> Result<(), rusqlite::Error> {
         let id = content.name();
+        self.connection.execute("INSERT INTO replies (id) VALUES (?1)", &[&id])?;
+        Ok(())
     }
 }
 
