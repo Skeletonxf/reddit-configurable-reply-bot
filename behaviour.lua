@@ -1,5 +1,3 @@
-print 'lua script running'
-
 local newline = "\n\n"
 
 local footer = newline .. "*****" .. newline ..
