@@ -13,7 +13,6 @@ use rawr::traits::Editable;
 
 use rlua::Lua;
 
-//use std::error::Error;
 use failure::Error;
 
 // expose database module for storing replies
@@ -24,10 +23,15 @@ enum RedditContent<'a> {
     SelfPost(&'a Submission<'a>),
 }
 
+fn reply_to(commentable: &Commentable, reply: &str) -> Result<(), Error> {
+    println!("Replying: {}", reply);
+    commentable.reply(reply)?;
+    Ok(())
+}
+
 // invokes the a lua instance on the behaviour script and makes the comment body
 // available to the script
 fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<(), Error> {
-
     // create a lua instance to define comment reply behaviour
     let lua = Lua::new();
     let globals = lua.globals();
@@ -75,25 +79,26 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<()
     lua.scope(|scope| {
         lua.globals().set(
             "reply",
-            scope.create_function_mut(|_, comment: String| {
-                println!("Replying: {}", comment);
-                return match content { // TODO fix warning 
+            scope.create_function_mut(|_, reply: String| {
+                match content {
                     &RedditContent::PostComment(comment) => {
-                        let result = database.reply(comment);
+                        let result = reply_to(comment, &reply).and_then(|_| {
+                            database.reply(comment)
+                        });
                         return match result {
                             Ok(()) => Ok(()),
-                            // convert from rusqlite error into rlua
-                            // external error type of faliure crate error
-                            Err(e) => Err(rlua::Error::ExternalError(std::sync::Arc::new(e.into()))),
+                            // convert errors into rLua external error
+                            Err(e) => Err(rlua::Error::ExternalError(std::sync::Arc::new(e))),
                         }
                     },
                     &RedditContent::SelfPost(post) => {
-                        let result = database.reply(post);
+                        let result = reply_to(post, &reply).and_then(|_| {
+                            database.reply(post)
+                        });
                         return match result {
                             Ok(()) => Ok(()),
-                            // convert from rusqlite error into rlua
-                            // external error type of faliure crate error
-                            Err(e) => Err(rlua::Error::ExternalError(std::sync::Arc::new(e.into()))),
+                            // convert errors into rLua external error
+                            Err(e) => Err(rlua::Error::ExternalError(std::sync::Arc::new(e))),
                         }
                     },
                 }

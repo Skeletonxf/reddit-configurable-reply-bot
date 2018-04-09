@@ -1,5 +1,8 @@
+extern crate failure;
 extern crate rawr;
 extern crate rusqlite;
+
+use failure::Error;
 
 use rawr::traits::Content;
 
@@ -14,7 +17,7 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn replied(&self, content: &Content) -> Result<bool, rusqlite::Error> {
+    pub fn replied(&self, content: &Content) -> Result<bool, Error> {
         let id = content.name();
         let found: i32 = try!(self.connection.query_row(
             "SELECT EXISTS (
@@ -24,14 +27,14 @@ impl Database {
         Ok(found == 1)
     }
 
-    pub fn reply(&self, content: &Content) -> Result<(), rusqlite::Error> {
+    pub fn reply(&self, content: &Content) -> Result<(), Error> {
         let id = content.name();
         self.connection.execute("INSERT INTO replies (id) VALUES (?1)", &[&id])?;
         Ok(())
     }
 }
 
-pub fn from_connection(path: &str) -> Result<Database, rusqlite::Error> {
+pub fn from_connection(path: &str) -> Result<Database, Error> {
     let connection = Connection::open(path)?;
     connection.execute(
         "CREATE TABLE IF NOT EXISTS replies (id TEXT PRIMARY KEY)", &[])?;
