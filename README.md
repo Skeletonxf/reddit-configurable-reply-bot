@@ -1,3 +1,5 @@
+This python version is now unmaintained, and remains here for archival purposes only.
+
 # reddit-sexuality-definition-bot
 
 This repo contains a python script for automated running of a bot to repspond to comments to provide set definitions
