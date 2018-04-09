@@ -17,3 +17,7 @@ When I first made the python version of this bot I only chose python because I c
 Reddit Sexuality Definition Bot is free software: you can redistribute it and/or modify it under the terms of the GNU General Affero Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 (The now unmaintained python version of this project was licensed under the MIT license)
+
+## Known issues
+
+Bot attempts to reply to archived posts which fails and causes a crash.
