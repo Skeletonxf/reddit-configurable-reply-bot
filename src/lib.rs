@@ -9,6 +9,7 @@ use rawr::structures::comment::Comment;
 use rawr::structures::subreddit::Subreddit;
 use rawr::structures::submission::Submission;
 use rawr::traits::Commentable;
+use rawr::traits::Content;
 use rawr::traits::Editable;
 
 use rlua::Lua;
@@ -36,6 +37,24 @@ pub mod db;
 enum RedditContent<'a> {
     PostComment(&'a Comment<'a>),
     SelfPost(&'a Submission<'a>),
+    LinkPost(&'a Submission<'a>),
+}
+
+impl <'a> RedditContent<'a> {
+    fn commentable(&self) -> &Commentable {
+        match self {
+            &RedditContent::PostComment(comment) => comment,
+            &RedditContent::SelfPost(post) => post,
+            &RedditContent::LinkPost(post) => post,
+        }
+    }
+    fn info(&self) -> &Content {
+        match self {
+            &RedditContent::PostComment(comment) => comment,
+            &RedditContent::SelfPost(post) => post,
+            &RedditContent::LinkPost(post) => post,
+        }
+    }
 }
 
 fn reply_to(commentable: &Commentable, reply: &str) -> Result<(), Error> {
@@ -44,13 +63,14 @@ fn reply_to(commentable: &Commentable, reply: &str) -> Result<(), Error> {
     Ok(())
 }
 
-// invokes the a lua instance on the behaviour script and makes the comment body
-// available to the script
+// invokes the lua instance on the behaviour script
+// making the reddit content information available to the script
 fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<(), Error> {
     // create a lua instance to define comment reply behaviour
     let lua = Lua::new();
     let globals = lua.globals();
 
+    // TODO refactor using Option<String> methods on the enum
     match content {
         &RedditContent::PostComment(comment) => {
             // print out comment and post title
@@ -69,6 +89,13 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<()
 
             // if these fail then the lua script will not work either
             globals.set("post", post_body)?;
+            globals.set("title", post_title)?;
+        },
+        &RedditContent::LinkPost(post) => {
+            let post_title = post.title();
+            println!("Post '{}'", post_title);
+
+            // if these fail then the lua script will not work either
             globals.set("title", post_title)?;
         }
     }
@@ -95,27 +122,16 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<()
         lua.globals().set(
             "reply",
             scope.create_function_mut(|_, reply: String| {
-                match content {
-                    &RedditContent::PostComment(comment) => {
-                        let result = reply_to(comment, &reply).and_then(|_| {
-                            database.reply(comment)
-                        });
-                        return match result {
-                            Ok(()) => Ok(()),
-                            // convert errors into rLua external error
-                            Err(e) => Err(rlua::Error::ExternalError(std::sync::Arc::new(e))),
-                        }
-                    },
-                    &RedditContent::SelfPost(post) => {
-                        let result = reply_to(post, &reply).and_then(|_| {
-                            database.reply(post)
-                        });
-                        return match result {
-                            Ok(()) => Ok(()),
-                            // convert errors into rLua external error
-                            Err(e) => Err(rlua::Error::ExternalError(std::sync::Arc::new(e))),
-                        }
-                    },
+                let commentable = content.commentable();
+                let info = content.info();
+
+                let result = reply_to(commentable, &reply).and_then(|_| {
+                    database.reply(info)
+                });
+                return match result {
+                    Ok(()) => Ok(()),
+                    // convert errors into rLua external error
+                    Err(e) => Err(rlua::Error::ExternalError(std::sync::Arc::new(e))),
                 }
             })?,
         )?;
@@ -152,8 +168,12 @@ fn search_post(post: Submission, database: &Database) -> std::result::Result<(),
     let title = String::from(post.title()).clone();
     println!("Scanning '{}'", title);
 
-    if post.is_self_post() && !database.replied(&post)? {
-        respond_to_comment(&RedditContent::SelfPost(&post), database)?;
+    if !database.replied(&post)? {
+        if post.is_self_post() {
+            respond_to_comment(&RedditContent::SelfPost(&post), database)?;
+        } else {
+            respond_to_comment(&RedditContent::LinkPost(&post), database)?;
+        }
     }
 
     // give the post to `replies` which will consume it

@@ -5,6 +5,11 @@ local footer = newline .. "*****" .. newline ..
   "Contact /u/skeletonxf for issues. I'm also " ..
   "[open source](https://github.com/Skeletonxf/reddit-sexuality-definition-bot)"
 
+if title and (not post) then
+  print 'not yet responding to link posts'
+  return
+end
+
 askingIfDemi = false
 for _, str in pairs({"am I demisexual", "if I'm demisexual", "make me demi?"}) do
     if containsIgnoreCase(comment or post, str) then
