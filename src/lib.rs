@@ -1,5 +1,6 @@
 extern crate failure;
 extern crate rawr;
+extern crate regex;
 extern crate rlua;
 
 use db::Database;
@@ -11,6 +12,8 @@ use rawr::structures::submission::Submission;
 use rawr::traits::Commentable;
 use rawr::traits::Content;
 use rawr::traits::Editable;
+
+use regex::Regex;
 
 use rlua::Lua;
 
@@ -63,6 +66,11 @@ fn reply_to(commentable: &Commentable, reply: &str) -> Result<(), Error> {
     Ok(())
 }
 
+// converts errors into rLua external errors
+fn propagate_to_rlua(error: Error) -> rlua::Error {
+    rlua::Error::ExternalError(std::sync::Arc::new(error.into()))
+}
+
 // invokes the lua instance on the behaviour script
 // making the reddit content information available to the script
 fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<(), Error> {
@@ -82,7 +90,7 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<()
             globals.set("comment", comment_body)?;
         },
         &RedditContent::SelfPost(post) => {
-            // will always be safe to unwrap in self posts
+            // will always be safe to unwrap body in self posts
             let post_body = post.body().unwrap();
             let post_title = post.title();
             println!("Post '{}'\n'{}'", post_title, post_body);
@@ -92,11 +100,14 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<()
             globals.set("title", post_title)?;
         },
         &RedditContent::LinkPost(post) => {
+            // will always be safe to unwrap link in link posts
+            let link = post.link_url().unwrap();
             let post_title = post.title();
-            println!("Post '{}'", post_title);
+            println!("Post '{}'\n'{}'", post_title, link);
 
             // if these fail then the lua script will not work either
             globals.set("title", post_title)?;
+            globals.set("link", link)?;
         }
     }
 
@@ -114,6 +125,24 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<()
     })?;
     globals.set("containsIgnoreCase", contains_ignore_case)?;
 
+    let to_lowercase = lua.create_function(
+            |_, string: String| {
+        Ok(string.to_lowercase())
+    })?;
+    globals.set("toLowercase", to_lowercase)?;
+
+    let matches_regex = lua.create_function(
+            |_, (string, regex): (String, String)| {
+        // TODO avoid recompilation
+        // https://docs.rs/regex/0.2.10/regex/#example-avoid-compiling-the-same-regex-in-a-loop
+        let regex = Regex::new(&regex);
+        return match regex {
+            Ok(regex) => Ok(regex.is_match(&string)),
+            Err(e) => Err(propagate_to_rlua(e.into())),
+        }
+    })?;
+    globals.set("matchesRegex", matches_regex)?;
+
     // create a scope within which reply function is defined for use
     // function for lua to reply to the comment
     // would not compile outside the scope because database
@@ -130,8 +159,7 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<()
                 });
                 return match result {
                     Ok(()) => Ok(()),
-                    // convert errors into rLua external error
-                    Err(e) => Err(rlua::Error::ExternalError(std::sync::Arc::new(e))),
+                    Err(e) => Err(propagate_to_rlua(e)),
                 }
             })?,
         )?;

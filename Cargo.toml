@@ -16,3 +16,7 @@ json = "0.11.13"
 rlua = "0.12.0"
 # converting to std::error::Error types for rlua
 failure = "0.1.1"
+
+# Non essential utilities for the lua script
+# regex parsing
+regex = "0.2"

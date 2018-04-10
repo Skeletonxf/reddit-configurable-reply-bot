@@ -5,23 +5,31 @@ local footer = newline .. "*****" .. newline ..
   "Contact /u/skeletonxf for issues. I'm also " ..
   "[open source](https://github.com/Skeletonxf/reddit-sexuality-definition-bot)"
 
-if title and (not post) then
-  print 'not yet responding to link posts'
-  return
-end
-
-askingIfDemi = false
-for _, str in pairs({"am I demisexual", "if I'm demisexual", "make me demi?"}) do
+if comment or post then
+  askingIfDemi = false
+  for _, str in pairs({"am I demisexual", "if I'm demisexual",
+      "make me demi?"}) do
     if containsIgnoreCase(comment or post, str) then
-        askingIfDemi = true
+      askingIfDemi = true
     end
-end
+  end
 
-if askingIfDemi then
-    print('found someone asking if they are demi: ' .. (comment or post))
+  if askingIfDemi then
+      print('found someone asking if they are demi: ' .. (comment or post))
+  end
 end
 
 local message = ""
+
+if title and (not post) then
+  -- link post
+  local link = toLowercase(link)
+  if matchesRegex(link, "reddit.com/r/.*?/comments/") and
+        (not contains(link, "reddit.com/r/demisexuality/")) then
+      print('found regex match', title, link)
+  end
+  return
+end
 
 local words = {
   ace = {
