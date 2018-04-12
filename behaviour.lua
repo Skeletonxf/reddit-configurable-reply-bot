@@ -23,6 +23,10 @@ local message = ""
 
 if title and (not post) then
   -- link post
+  -- check for http://demisexuality.freeforums.net/
+  -- https://www.asexuality.org/.*?/forum/.*?/
+  -- https://regex101.com/
+  -- https://docs.rs/regex/0.2.10/regex/#syntax
   local link = toLowercase(link)
   if matchesRegex(link, "reddit.com/r/.*?/comments/") and
         (not contains(link, "reddit.com/r/demisexuality/")) then

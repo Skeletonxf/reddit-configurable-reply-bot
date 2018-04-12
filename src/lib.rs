@@ -1,17 +1,23 @@
+extern crate ansi_term;
 extern crate failure;
 extern crate rawr;
 extern crate regex;
 extern crate rlua;
 
+// expose database module for storing replies
+pub mod db;
+
+// reddit crate module wrapper
+mod reddit;
+
+use ansi_term::Colour::Yellow;
+use ansi_term::Colour::Green;
+
 use db::Database;
 
-use rawr::options::ListingOptions;
-use rawr::structures::comment::Comment;
-use rawr::structures::subreddit::Subreddit;
-use rawr::structures::submission::Submission;
-use rawr::traits::Commentable;
-use rawr::traits::Content;
-use rawr::traits::Editable;
+use rawr::client::RedditClient;
+
+use reddit::RedditContent;
 
 use regex::Regex;
 
@@ -19,8 +25,7 @@ use rlua::Lua;
 
 use failure::Error;
 
-// expose database module for storing replies
-pub mod db;
+pub type LibResult<T> = Result<T, Error>;
 
 // This file is part of Reddit Sexuality Definition Bot.
 //
@@ -37,35 +42,6 @@ pub mod db;
 // You should have received a copy of the GNU Affero General Public License
 // along with Reddit Sexuality Definition Bot.  If not, see <http://www.gnu.org/licenses/>.
 
-enum RedditContent<'a> {
-    PostComment(&'a Comment<'a>),
-    SelfPost(&'a Submission<'a>),
-    LinkPost(&'a Submission<'a>),
-}
-
-impl <'a> RedditContent<'a> {
-    fn commentable(&self) -> &Commentable {
-        match self {
-            &RedditContent::PostComment(comment) => comment,
-            &RedditContent::SelfPost(post) => post,
-            &RedditContent::LinkPost(post) => post,
-        }
-    }
-    fn info(&self) -> &Content {
-        match self {
-            &RedditContent::PostComment(comment) => comment,
-            &RedditContent::SelfPost(post) => post,
-            &RedditContent::LinkPost(post) => post,
-        }
-    }
-}
-
-fn reply_to(commentable: &Commentable, reply: &str) -> Result<(), Error> {
-    println!("Replying: {}", reply);
-    commentable.reply(reply)?;
-    Ok(())
-}
-
 // converts errors into rLua external errors
 fn propagate_to_rlua(error: Error) -> rlua::Error {
     rlua::Error::ExternalError(std::sync::Arc::new(error.into()))
@@ -73,42 +49,48 @@ fn propagate_to_rlua(error: Error) -> rlua::Error {
 
 // invokes the lua instance on the behaviour script
 // making the reddit content information available to the script
-fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<(), Error> {
+fn respond_to_comment(content: &RedditContent, database: &Database) -> LibResult<()> {
     // create a lua instance to define comment reply behaviour
     let lua = Lua::new();
     let globals = lua.globals();
 
-    // TODO refactor using Option<String> methods on the enum
-    match content {
-        &RedditContent::PostComment(comment) => {
-            // print out comment and post title
-            // safe because this is always a comment
-            let comment_body = comment.body().unwrap();
-            println!("Comment '{}'", comment_body);
-
-            // if these fail then the lua script will not work either
-            globals.set("comment", comment_body)?;
-        },
-        &RedditContent::SelfPost(post) => {
-            // will always be safe to unwrap body in self posts
-            let post_body = post.body().unwrap();
-            let post_title = post.title();
-            println!("Post '{}'\n'{}'", post_title, post_body);
-
-            // if these fail then the lua script will not work either
-            globals.set("post", post_body)?;
-            globals.set("title", post_title)?;
-        },
-        &RedditContent::LinkPost(post) => {
-            // will always be safe to unwrap link in link posts
-            let link = post.link_url().unwrap();
-            let post_title = post.title();
-            println!("Post '{}'\n'{}'", post_title, link);
-
-            // if these fail then the lua script will not work either
-            globals.set("title", post_title)?;
-            globals.set("link", link)?;
+    {
+        let body = content.body();
+        match body {
+            Some(body) => {
+                println!("{} '{}'", Yellow.paint("Comment"), &body);
+                if content.is_comment() {
+                    globals.set("comment", body)?;
+                } else {
+                    globals.set("post", body)?;
+                }
+            }
+            None => (),
         }
+    }
+    {
+        let title = content.title();
+        match title {
+            Some(title) => {
+                println!("{} '{}'", Green.paint("Title"), &title);
+                globals.set("title", title)?;
+            },
+            None => (),
+        }
+    }
+    {
+        let link_url = content.link_url();
+        match link_url {
+            Some(link_url) => {
+                println!("{} '{}'", Green.paint("Link"), &link_url);
+                globals.set("link", link_url)?;
+            },
+            None => (),
+        }
+    }
+    {
+        let content_type = content.content_type();
+        globals.set("__type", content_type)?;
     }
 
     let contains = lua.create_function(
@@ -151,11 +133,9 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<()
         lua.globals().set(
             "reply",
             scope.create_function_mut(|_, reply: String| {
-                let commentable = content.commentable();
-                let info = content.info();
 
-                let result = reply_to(commentable, &reply).and_then(|_| {
-                    database.reply(info)
+                let result = content.reply(&reply).and_then(|_| {
+                    database.reply(content)
                 });
                 return match result {
                     Ok(()) => Ok(()),
@@ -164,7 +144,7 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<()
             })?,
         )?;
 
-        // run the code, the result is not actually used for anything
+        // run the code, the result is not used for anything
         // but errors should propagate
         // must run within the scope because the reply function will not be valid after
         lua.eval::<()>("require('behaviour')", Some("behaviour script"))
@@ -173,71 +153,11 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> Result<()
     Ok(())
 }
 
-// recurses through the comment tree
-fn recurse_on_comment(comment: Comment, database: &Database) -> std::result::Result<(), Error> {
-
-    if !database.replied(&comment)? {
-        respond_to_comment(&RedditContent::PostComment(&comment), database)?;
-    }
-
-    let replies = comment.replies();
-    if replies.is_ok() {
-        for reply in replies.unwrap().take(10) {
-            recurse_on_comment(reply, database)?;
-        }
-    } else {
-        eprintln!("APIError on nested comment"); // TODO better debugging info
-    }
-    Ok(())
-}
-
-fn search_post(post: Submission, database: &Database) -> std::result::Result<(), Error> {
-    // make a copy of the title to continue referring to after post is consumed
-    let title = String::from(post.title()).clone();
-    println!("Scanning '{}'", title);
-
-    if !database.replied(&post)? {
-        if post.is_self_post() {
-            respond_to_comment(&RedditContent::SelfPost(&post), database)?;
-        } else {
-            respond_to_comment(&RedditContent::LinkPost(&post), database)?;
-        }
-    }
-
-    // give the post to `replies` which will consume it
-    let comments = post.replies();
-    if comments.is_ok() {
-        let comments = comments.unwrap().take(100);
-        for comment in comments {
-            recurse_on_comment(comment, database)?;
-            //println!("Comment in '{}':\n{}\n", &title, comment.body().unwrap())
-        }
-    } else {
-        eprintln!("APIError on post {}", title);
-    }
-    Ok(())
-}
-
-// runs the comment search and reply
-pub fn run(subreddits: Vec<Subreddit>, database: &Database) -> std::result::Result<(), Error> {
-
+// runs the comment search and reply on each subreddit
+pub fn run(subreddits: &Vec<String>, client: &RedditClient, database: &Database) -> LibResult<()> {
     for subreddit in subreddits {
-        let about = subreddit.about();
-        if about.is_ok() {
-            println!("{} {}", subreddit.name, about.unwrap().display_name());
-        } else {
-            eprintln!("Could not fetch about data in {}", subreddit.name);
-        }
-        let hot = subreddit.hot(ListingOptions::default());
-        if hot.is_ok() {
-            for post in hot.unwrap().take(5) {
-                println!("Found '{}' in '{}'", post.title(), subreddit.name);
-                println!();
-                search_post(post, database)?;
-            }
-        } else {
-            eprintln!("APIError on subreddit {}", subreddit.name);
-        }
+        let subreddit = client.subreddit(subreddit);
+        reddit::search(&subreddit, database)?;
     }
     Ok(())
 }

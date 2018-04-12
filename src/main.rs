@@ -1,14 +1,12 @@
-extern crate failure;
 extern crate json;
 extern crate rawr;
 extern crate sexuality_def_bot;
 
 use rawr::auth::PasswordAuthenticator;
 use rawr::client::RedditClient;
-use rawr::structures::subreddit::Subreddit;
 
-//use std::error::Error;
-use failure::Error;
+use sexuality_def_bot::LibResult;
+
 use std::fs::File;
 use std::io::Read;
 use std::io;
@@ -23,7 +21,7 @@ fn read_file(name: &str) -> Result<String, io::Error> {
     Ok(contents)
 }
 
-fn read_json(name: &str) -> Result<JsonValue, Error> {
+fn read_json(name: &str) -> LibResult<JsonValue> {
     let contents = read_file(name)?;
     let parsed = json::parse(&contents)?;
     Ok(parsed)
@@ -40,13 +38,13 @@ fn get_client(mut data: JsonValue) -> RedditClient {
     RedditClient::new("linux:rawr:v0.0.1 (by /u/skeletonxf)", authenticator)
 }
 
-// Returns a list of Subreddits specified in the subreddits.json
-fn get_subreddits(data: JsonValue, client: &RedditClient) -> Vec<Subreddit> {
+// Returns a list of subreddit Strings specified in the subreddits.json
+fn get_subreddits(data: JsonValue) -> Vec<String> {
     let mut list = Vec::new();
     for element in data.members() {
         let name = element.as_str().expect(
             "All elements in subreddits.json array should be strings"); // TODO
-        list.push(client.subreddit(name));
+        list.push(name.to_owned());
     }
     println!("{}", data.dump());
     list
@@ -63,14 +61,14 @@ fn main() {
         eprintln!("Problem with subreddits data: {}", e);
         process::exit(1);
     });
-    let subreddits = get_subreddits(json_subreddits_data, &client);
+    let subreddits = get_subreddits(json_subreddits_data);
 
     let database = sexuality_def_bot::db::from_connection("db.sqlite").unwrap_or_else(|e| {
         eprintln!("Problem with SQL database: {}", e);
         process::exit(1);
     });
 
-    sexuality_def_bot::run(subreddits, &database).unwrap_or_else(|e| {
+    sexuality_def_bot::run(&subreddits, &client, &database).unwrap_or_else(|e| {
         eprintln!("Problem running bot: {}", e);
         process::exit(1);
     });
