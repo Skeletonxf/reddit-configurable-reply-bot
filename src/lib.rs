@@ -7,15 +7,18 @@ extern crate rlua;
 // expose database module for storing replies
 pub mod db;
 
+// expose configuration struct
+pub mod configuration;
+
 // reddit crate module wrapper
 mod reddit;
 
 use ansi_term::Colour::Yellow;
 use ansi_term::Colour::Green;
 
-use db::Database;
+use configuration::Configuration;
 
-use rawr::client::RedditClient;
+use db::Database;
 
 use reddit::RedditContent;
 
@@ -133,7 +136,6 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> LibResult
         lua.globals().set(
             "reply",
             scope.create_function_mut(|_, reply: String| {
-
                 let result = content.reply(&reply).and_then(|_| {
                     database.reply(content)
                 });
@@ -154,10 +156,10 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> LibResult
 }
 
 // runs the comment search and reply on each subreddit
-pub fn run(subreddits: &Vec<String>, client: &RedditClient, database: &Database) -> LibResult<()> {
-    for subreddit in subreddits {
-        let subreddit = client.subreddit(subreddit);
-        reddit::search(&subreddit, database)?;
+pub fn run(config: &Configuration) -> LibResult<()> {
+    for subreddit in &config.subreddits {
+        let subreddit = config.client.subreddit(subreddit);
+        reddit::search(&subreddit, config)?;
     }
     Ok(())
 }

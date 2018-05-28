@@ -1,9 +1,14 @@
+extern crate ansi_term;
 extern crate failure;
 extern crate rawr;
 
 use db::Database;
 
 use LibResult;
+
+use ansi_term::Colour::Blue;
+
+use configuration::Configuration;
 
 use rawr::options::ListingOptions;
 use rawr::structures::comment::Comment;
@@ -13,6 +18,7 @@ use rawr::traits::Commentable;
 use rawr::traits::Content;
 use rawr::traits::Editable;
 
+// TODO avoid cyclic dependencies
 use respond_to_comment;
 
 /*
@@ -45,6 +51,7 @@ impl <'a> RedditContent<'a> {
             _ => None,
         }
     }
+
     /*
      * Gets the title of the reddit content.
      * Comments have no title so return None
@@ -87,7 +94,7 @@ impl <'a> RedditContent<'a> {
     }
 
     pub fn reply(&self, reply: &str) -> LibResult<()> {
-        println!("Replying: {}", reply);
+        println!("{} {}", Blue.paint("Replying:"), reply);
         self.commentable().reply(reply)?;
         Ok(())
     }
@@ -109,7 +116,7 @@ impl <'a> RedditContent<'a> {
     }
 }
 
-pub fn search(subreddit: &Subreddit, database: &Database) -> LibResult<()> {
+pub fn search(subreddit: &Subreddit, config: &Configuration) -> LibResult<()> {
     let about = subreddit.about();
     if about.is_ok() {
         println!("{} {}", subreddit.name, about.unwrap().display_name());
@@ -121,7 +128,7 @@ pub fn search(subreddit: &Subreddit, database: &Database) -> LibResult<()> {
         for post in hot.unwrap().take(7) {
             println!("Found '{}' in '{}'", post.title(), subreddit.name);
             println!();
-            search_post(post, database)?;
+            search_post(post, config)?;
         }
     } else {
         eprintln!("APIError on subreddit {}", subreddit.name);
@@ -131,20 +138,36 @@ pub fn search(subreddit: &Subreddit, database: &Database) -> LibResult<()> {
 
 // Responds to the post if it has not been responded to already
 // and then recurses on the comment tree
-fn search_post(post: Submission, database: &Database) -> LibResult<()> {
+fn search_post(post: Submission, config: &Configuration) -> LibResult<()> {
     // make a copy of the title to continue referring to after post is consumed
     let title = String::from(post.title()).clone();
     println!("Scanning '{}'", title);
 
-    if post.is_self_post() {
-        let post = RedditContent::SelfPost(&post);
-        if !database.replied(&post)? {
-            respond_to_comment(&post, database)?;
+    let mut replied = false;
+    {
+        let _post = post.clone();
+        let mut replies = _post.replies()?; // _post has been consumed
+        if replies.any(|c| c.author().name == config.authentication.username ) {
+            replied = true;
         }
-    } else {
-        let post = RedditContent::LinkPost(&post);
-        if !database.replied(&post)? {
-            respond_to_comment(&post, database)?;
+        // let replies die
+    }
+
+    let database = &config.database;
+
+    // Don't reply to a post if we've already replied to it.
+    // This helps with migrating devices/databases to run the bot.
+    if !replied {
+        if post.is_self_post() {
+            let post = RedditContent::SelfPost(&post);
+            if !database.replied(&post)? {
+                respond_to_comment(&post, database)?;
+            }
+        } else {
+            let post = RedditContent::LinkPost(&post);
+            if !database.replied(&post)? {
+                respond_to_comment(&post, database)?;
+            }
         }
     }
 
@@ -167,6 +190,10 @@ fn search_post(post: Submission, database: &Database) -> LibResult<()> {
 fn recurse_on_comment(comment: Comment, database: &Database) -> LibResult<()> {
     {
         let comment = RedditContent::PostComment(&comment);
+
+        // TODO don't reply to the comment if we've already replied to it
+        // may need to fork the rawr repo to add Clone to Comment
+
         if !database.replied(&comment)? {
             respond_to_comment(&comment, database)?;
         }

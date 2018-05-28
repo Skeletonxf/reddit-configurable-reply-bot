@@ -7,7 +7,10 @@ authors = ["Skeletonxf <skeletonxf@gmail.com>"]
 # reddit api
 # need unreleased patch that makes newlines work on reddit
 # https://github.com/Aurora0001/rawr/commit/34bc914cc6a9fe001ebab7b90a9c396e8a36b2ba
-rawr = { git = 'https://github.com/Aurora0001/rawr' }
+# and also need Clone for Submission types so don't lose the object
+# when want to look over its replies
+# implemented by https://github.com/JoshMcguigan/rawr/commit/dcc7402ccbd60444a2ee2a18c6de2c7835375319
+rawr = { git = 'https://github.com/JoshMcguigan/rawr' }
 # sqlite db
 rusqlite = "0.13.0"
 # json parsing
