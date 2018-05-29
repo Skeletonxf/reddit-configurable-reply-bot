@@ -99,7 +99,7 @@ local words = {
       "A pansexual person is a person who experiences sexual attraction " ..
       "irrespective of gender / to all genders. Some may consider themseles " ..
       "to be gender blind as apposed to gender attracted or to be attracted " ..
-      "to a person's personality rather than gender or appearence. " ..
+      "to a person's personality rather than gender or appearance. " ..
       "[~~Learn More~~](https://www.reddit.com/r/SexualityDefBot/" ..
       "comments/510m0s/definitions/)" ..
       newline
