@@ -14,11 +14,9 @@ pub mod configuration;
 mod reddit;
 
 use ansi_term::Colour::Yellow;
-use ansi_term::Colour::Green;
+use ansi_term::Colour::Cyan;
 
 use configuration::Configuration;
-
-use db::Database;
 
 use reddit::RedditContent;
 
@@ -52,7 +50,7 @@ fn propagate_to_rlua(error: Error) -> rlua::Error {
 
 // invokes the lua instance on the behaviour script
 // making the reddit content information available to the script
-fn respond_to_comment(content: &RedditContent, database: &Database) -> LibResult<()> {
+fn lua_behaviour(content: &RedditContent) -> LibResult<()> {
     // create a lua instance to define comment reply behaviour
     let lua = Lua::new();
     let globals = lua.globals();
@@ -75,7 +73,7 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> LibResult
         let title = content.title();
         match title {
             Some(title) => {
-                println!("{} '{}'", Green.paint("Title"), &title);
+                println!("{} '{}'", Cyan.paint("Title"), &title);
                 globals.set("title", title)?;
             },
             None => (),
@@ -85,7 +83,7 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> LibResult
         let link_url = content.link_url();
         match link_url {
             Some(link_url) => {
-                println!("{} '{}'", Green.paint("Link"), &link_url);
+                println!("{} '{}'", Cyan.paint("Link"), &link_url);
                 globals.set("link", link_url)?;
             },
             None => (),
@@ -136,9 +134,7 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> LibResult
         lua.globals().set(
             "reply",
             scope.create_function_mut(|_, reply: String| {
-                let result = content.reply(&reply).and_then(|_| {
-                    database.reply(content)
-                });
+                let result = content.reply(&reply);
                 return match result {
                     Ok(()) => Ok(()),
                     Err(e) => Err(propagate_to_rlua(e)),
@@ -158,8 +154,7 @@ fn respond_to_comment(content: &RedditContent, database: &Database) -> LibResult
 // runs the comment search and reply on each subreddit
 pub fn run(config: &Configuration) -> LibResult<()> {
     for subreddit in &config.subreddits {
-        let subreddit = config.client.subreddit(subreddit);
-        reddit::search(&subreddit, config)?;
+        reddit::new_subreddit_crawler(subreddit, config).run(&lua_behaviour)?;
     }
     Ok(())
 }

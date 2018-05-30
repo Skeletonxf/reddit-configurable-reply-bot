@@ -2,8 +2,6 @@ extern crate rusqlite;
 
 use LibResult;
 
-use reddit::RedditContent;
-
 use self::rusqlite::Connection;
 
 /*
@@ -15,8 +13,7 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn replied(&self, content: &RedditContent) -> LibResult<bool> {
-        let id = content.name();
+    pub fn replied(&self, id: &str) -> LibResult<bool> {
         let found: i32 = try!(self.connection.query_row(
             "SELECT EXISTS (
                 SELECT 1 FROM replies WHERE id = ?1 LIMIT 1
@@ -25,8 +22,7 @@ impl Database {
         Ok(found == 1)
     }
 
-    pub fn reply(&self, content: &RedditContent) -> LibResult<()> {
-        let id = content.name();
+    pub fn reply(&self, id: &str) -> LibResult<()> {
         self.connection.execute("INSERT INTO replies (id) VALUES (?1)", &[&id])?;
         Ok(())
     }
