@@ -12,6 +12,7 @@ use configuration::Configuration;
 
 use rawr::options::ListingOptions;
 use rawr::structures::comment::Comment;
+use rawr::structures::comment_list::CommentList;
 use rawr::structures::subreddit::Subreddit;
 use rawr::structures::submission::Submission;
 use rawr::traits::Commentable;
@@ -136,6 +137,10 @@ pub fn search(subreddit: &Subreddit, config: &Configuration) -> LibResult<()> {
     Ok(())
 }
 
+fn already_replied(mut replies: CommentList, config: &Configuration) -> bool {
+    replies.any(|c| c.author().name == config.authentication.username)
+}
+
 // Responds to the post if it has not been responded to already
 // and then recurses on the comment tree
 fn search_post(post: Submission, config: &Configuration) -> LibResult<()> {
@@ -143,14 +148,9 @@ fn search_post(post: Submission, config: &Configuration) -> LibResult<()> {
     let title = String::from(post.title()).clone();
     println!("Scanning '{}'", title);
 
-    let mut replied = false;
+    let replied;
     {
-        let _post = post.clone();
-        let mut replies = _post.replies()?; // _post has been consumed
-        if replies.any(|c| c.author().name == config.authentication.username ) {
-            replied = true;
-        }
-        // let replies die
+        replied = already_replied(post.clone().replies()?, config);
     }
 
     let database = &config.database;
@@ -176,7 +176,7 @@ fn search_post(post: Submission, config: &Configuration) -> LibResult<()> {
     if comments.is_ok() {
         let comments = comments.unwrap().take(100);
         for comment in comments {
-            recurse_on_comment(comment, database)?;
+            recurse_on_comment(comment, database, config)?;
             //println!("Comment in '{}':\n{}\n", &title, comment.body().unwrap())
         }
     } else {
@@ -187,14 +187,16 @@ fn search_post(post: Submission, config: &Configuration) -> LibResult<()> {
 
 // Responds to every comment in this tree that has not already been
 // responded to.
-fn recurse_on_comment(comment: Comment, database: &Database) -> LibResult<()> {
+fn recurse_on_comment(comment: Comment, database: &Database, config: &Configuration) -> LibResult<()> {
     {
+        let replied;
+        {
+            replied = already_replied(comment.clone().replies()?, config);
+        }
+
         let comment = RedditContent::PostComment(&comment);
 
-        // TODO don't reply to the comment if we've already replied to it
-        // may need to fork the rawr repo to add Clone to Comment
-
-        if !database.replied(&comment)? {
+        if !replied && !database.replied(&comment)? {
             respond_to_comment(&comment, database)?;
         }
     }
@@ -202,7 +204,7 @@ fn recurse_on_comment(comment: Comment, database: &Database) -> LibResult<()> {
     let replies = comment.replies();
     if replies.is_ok() {
         for reply in replies.unwrap().take(10) {
-            recurse_on_comment(reply, database)?;
+            recurse_on_comment(reply, database, config)?;
         }
     } else {
         eprintln!("APIError on nested comment"); // TODO better debugging info
