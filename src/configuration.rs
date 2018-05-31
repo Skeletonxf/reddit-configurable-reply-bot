@@ -2,10 +2,10 @@ extern crate failure;
 extern crate json;
 extern crate rawr;
 
+use self::json::JsonValue;
+
 use db;
 use db::Database;
-
-use self::json::JsonValue;
 
 use rawr::auth::PasswordAuthenticator;
 use rawr::client::RedditClient;

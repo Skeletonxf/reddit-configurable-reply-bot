@@ -4,15 +4,6 @@ extern crate rawr;
 extern crate regex;
 extern crate rlua;
 
-// expose database module for storing replies
-pub mod db;
-
-// expose configuration struct
-pub mod configuration;
-
-// reddit crate module wrapper
-mod reddit;
-
 use ansi_term::Colour::Yellow;
 use ansi_term::Colour::Cyan;
 
@@ -25,6 +16,15 @@ use regex::Regex;
 use rlua::Lua;
 
 use failure::Error;
+
+// expose database module for storing replies
+pub mod db;
+
+// expose configuration struct
+pub mod configuration;
+
+// reddit crate module wrapper
+mod reddit;
 
 pub type LibResult<T> = Result<T, Error>;
 

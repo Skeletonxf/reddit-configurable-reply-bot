@@ -2,13 +2,13 @@ extern crate ansi_term;
 extern crate failure;
 extern crate rawr;
 
-use LibResult;
-
 use ansi_term::Colour::Blue;
 use ansi_term::Colour::Green;
 use ansi_term::Colour::Purple;
 
 use configuration::Configuration;
+
+use LibResult;
 
 use rawr::options::ListingOptions;
 use rawr::structures::comment::Comment;
@@ -29,8 +29,10 @@ pub enum RedditContent<'a, 'b> {
     LinkPost(&'a Submission<'a>, &'b Configuration),
 }
 
-pub fn new_reddit_content_from_post<'a, 'b>(post: &'a Submission, config: &'b Configuration)
--> RedditContent<'a, 'b> {
+pub fn new_reddit_content_from_post<'a, 'b>(
+    post: &'a Submission,
+    config: &'b Configuration,
+) -> RedditContent<'a, 'b> {
     if post.is_self_post() {
         RedditContent::SelfPost(post, config)
     } else {
@@ -38,8 +40,10 @@ pub fn new_reddit_content_from_post<'a, 'b>(post: &'a Submission, config: &'b Co
     }
 }
 
-pub fn new_reddit_content_from_comment<'a, 'b>(comment: &'a Comment, config: &'b Configuration)
--> RedditContent<'a, 'b> {
+pub fn new_reddit_content_from_comment<'a, 'b>(
+    comment: &'a Comment,
+    config: &'b Configuration,
+) -> RedditContent<'a, 'b> {
     RedditContent::PostComment(comment, config)
 }
 
@@ -172,8 +176,10 @@ pub struct SubredditCrawler<'c> {
 /*
  * Creates a crawler for this subreddit and configuration
  */
-pub fn new_subreddit_crawler<'c>(subreddit: &str, config: &'c Configuration)
--> SubredditCrawler<'c> {
+pub fn new_subreddit_crawler<'c>(
+    subreddit: &str,
+    config: &'c Configuration,
+) -> SubredditCrawler<'c> {
     SubredditCrawler {
         config,
         subreddit: config.client.subreddit(subreddit)
@@ -232,7 +238,7 @@ impl<'c> SubredditCrawler<'c> {
         Ok(())
     }
 
-    fn scan_comment_tree<F>(&self, comment: Comment, behavior: &F)  -> LibResult<()>
+    fn scan_comment_tree<F>(&self, comment: Comment, behavior: &F) -> LibResult<()>
     where F: Fn(&RedditContent) -> LibResult<()> {
         {
             let content = new_reddit_content_from_comment(&comment, self.config);

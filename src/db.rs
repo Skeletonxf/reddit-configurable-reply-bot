@@ -1,8 +1,8 @@
 extern crate rusqlite;
 
-use LibResult;
-
 use self::rusqlite::Connection;
+
+use LibResult;
 
 /*
  * Database module to check and track replies to comments.
