@@ -3,19 +3,54 @@ local newline = "\n\n"
 local footer = newline .. "*****" .. newline ..
   "I'm a bot and this message was performed automatically. " ..
   "Contact /u/skeletonxf for issues. I'm also " ..
-  "[open source](https://github.com/Skeletonxf/reddit-sexuality-definition-bot)"
+  "[open source](https://github.com/Skeletonxf/reddit-configurable-reply-bot)"
 
 if comment or post then
   askingIfDemi = false
-  for _, str in pairs({"am I demisexual", "if I'm demisexual",
-      "make me demi?"}) do
-    if containsIgnoreCase(comment or post, str) then
-      askingIfDemi = true
+  for _, str in pairs({
+    "am I demisexual",
+    "if I'm demisexual",
+    "if I am demisexual",
+    "make me demi?",
+    "can you be demi and ",
+    "I think I'm demi",
+    "I think I am demi",
+    "demi but I'm not sure",
+    "demi but I am not sure",
+    "demisexual but I'm not sure",
+    "demisexual but I am not sure",
+    "I might be demi",
+    "I may be demi"
+  }) do
+    if post then
+      if containsIgnoreCase(post, str) then
+        askingIfDemi = true
+      end
+    end
+    if title then
+      if containsIgnoreCase(title, str) then
+        askingIfDemi = true
+      end
     end
   end
 
   if askingIfDemi then
-      print('found someone asking if they are demi: ' .. (comment or post))
+    print('found someone asking if they are demi: ' .. (comment or post))
+    print("***********************************************************")
+    -- reply(
+    --   "It looks like you might be asking if you're demisexual. " ..
+    --   "If so you've come to the right place!" ..
+    --   newline ..
+    --   "We have a pinned Links and Resources Masterpost with lots of " ..
+    --   "information which may be helpful to you, such as" ..
+    --   "[Could I be Demisexual](https://web.archive.org/web/20170210212104/http://demisexuality.org/articles/could-i-be-demisexual/)" ..
+    --   "and [Am I demisexual if](https://web.archive.org/web/20170210210629/http://demisexuality.org/articles/am-i-demisexual-if/)" ..
+    --   newline ..
+    --   "I'm a bot so I don't know what you actually said." ..
+    --   "Maybe you've just looking for reassurance " ..
+    --   "in which case remember you know yourself best" ..
+    --   footer
+    -- )
   end
 end
 
@@ -25,6 +60,7 @@ if title and (not post) then
   -- link post
   -- check for http://demisexuality.freeforums.net/
   -- https://www.asexuality.org/.*?/forum/.*?/
+  --
   -- https://regex101.com/
   -- https://docs.rs/regex/0.2.10/regex/#syntax
   local link = toLowercase(link)
