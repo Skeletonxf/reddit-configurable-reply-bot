@@ -3,3 +3,5 @@
 Cargo.lock
 authentication.json
 *.sqlite
+logs.txt
+prerun.sh
