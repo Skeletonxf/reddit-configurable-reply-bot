@@ -9,6 +9,7 @@ if comment or post then
   askingIfDemi = false
   for _, str in pairs({
     "am I demisexual",
+    "am I demi?",
     "if I'm demisexual",
     "if I am demisexual",
     "make me demi?",
