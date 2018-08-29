@@ -1,9 +1,20 @@
-local newline = "\n\n"
+newline = "\n\n"
 
-local footer = newline .. "*****" .. newline ..
+footer = newline .. "*****" .. newline ..
   "I'm a bot and this message was performed automatically. " ..
   "Contact /u/skeletonxf for issues. I'm also " ..
   "[open source](https://github.com/Skeletonxf/reddit-configurable-reply-bot)"
+
+-- only do weekly topics in response to moderator bot posts
+-- so normal users cannot confuse this bot by posting a mock
+-- weekly discussion
+if post and title and author == 'AutoModerator' then
+  if containsIgnoreCase(title, 'Weekly /r/demisexuality discussion thread') then
+    local topics = require 'weekly-topics'
+    topics.run()
+    return
+  end
+end
 
 if comment or post then
   askingIfDemi = false

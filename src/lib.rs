@@ -56,6 +56,12 @@ fn lua_behaviour(content: &RedditContent) -> LibResult<()> {
     let globals = lua.globals();
 
     {
+        // provide author information to bot for any type of reddit
+        // content
+        globals.set("author", content.author())?;
+    }
+
+    {
         let body = content.body();
         match body {
             Some(body) => {

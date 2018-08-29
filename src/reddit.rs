@@ -90,6 +90,17 @@ impl <'a, 'b> RedditContent<'a, 'b> {
         }
     }
 
+    /**
+     * Gets the name of the author of this reddit content.
+     */
+    pub fn author(&self) -> String {
+        match self {
+            &RedditContent::PostComment(post, _) => post.author().name,
+            &RedditContent::SelfPost(post, _) => post.author().name,
+            &RedditContent::LinkPost(post, _) => post.author().name,
+        }
+    }
+
     /*
     * The type of reddit content as a string
     */
