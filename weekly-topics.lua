@@ -15,10 +15,9 @@ function topics.run()
   for week, topic in pairs(topics) do
     if containsIgnoreCase(title, week) then
       print('Posting Weekly topic')
-      reply(
-        "Weekly discussion thread topic" ..
-        newline ..
+      reply("" ..
         topic ..
+        newline ..
         "*****" ..
         newline ..
         "Thanks to the Demisexuality discord for these topics https://discord.gg/4R8gKUa" ..
