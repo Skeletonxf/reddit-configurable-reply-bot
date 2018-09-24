@@ -12,7 +12,7 @@ authors = ["Skeletonxf <skeletonxf@gmail.com>"]
 # implemented by https://github.com/JoshMcguigan/rawr/commit/dcc7402ccbd60444a2ee2a18c6de2c7835375319
 # also need Clone for Comments at
 # https://github.com/Skeletonxf/rawr/commit/b8075ec9a141e3e807949b0f4f2d1bd3468e8af3
-rawr = { git = 'https://github.com/Skeletonxf/rawr' }
+rawr = { git = 'https://github.com/JoshMcguigan/rawr' }
 # sqlite db
 rusqlite = "0.13.0"
 # json parsing
