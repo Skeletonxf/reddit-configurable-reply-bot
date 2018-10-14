@@ -20,6 +20,15 @@ function topics.run()
       "http://wiki.asexuality.org/Gray-A/Grey-A",
     ['October 14, 2018'] = "**A Demisexual Mascot**" .. newline ..
       'Some in the Asexual community see Dragons as their "Mascot" of sorts. If Demisexuals had a "Mascot", what would it be?',
+    ['October 21, 2018'] = "**Too Sexy For Their Shirts**" .. newline ..
+      "Do you get crushes on people? What about squishes? How do you tell them apart and how do you deal with them?" .. newline ..
+      "(Squish https://www.urbandictionary.com/define.php?term=squish)",
+    ['October 28, 2018'] = "**Sex Sells, Or Does It?**" .. newline ..
+      "So much of our society revolves around sexuality, especially in marketing. Do you find the sales technique of using sex to sell works for you, or is it a turn off?",
+    ['November 04, 2018'] = "**Good Touch & Bad Touch**" .. newline ..
+      "How do you feel about people touching you in platonic settings? Are you the touchy feely sort, or do you prefer to keep people at arms length? Is there a difference between those that are strangers, acquaintances and friends?",
+    ['November 11, 2018'] = "**Greener On This Side**" .. newline ..
+      "What is your favorite thing about being Demisexual? Do you find it easier to relax or focus, are some things more clear to you than to your Allosexual friends?",
   }
   for week, topic in pairs(topics) do
     if containsIgnoreCase(title, week) then
