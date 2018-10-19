@@ -14,10 +14,10 @@ The Rust code defines a number of globals for the Lua script:
 - `containsIgnoreCase(string, substring) -> boolean` - the same as `contains` but case insensitive
 - `matchesRegex(string, regex) -> boolean` - a function that checks if the supplied string matches the regex (Rust regex not Lua regex)
 - `toLowercase(string) -> string` - a function that returns the lowercase version of a string (this is Unicode aware unlike Lua)
-- `reply(string)`- replies to the post/comment (after replying the bot will not invoke your Lua script on this post/comment again if you want to reply multiple times you need to do so in one pass)
+- `reply(string)` - replies to the post/comment (after replying the bot will not invoke your Lua script on this post/comment again if you want to reply multiple times you need to do so in one pass)
 
 Example bot that replies to 'ping' with 'pong' anywhere it sees it (this would be your `behaviour.lua` script).
-```
+```lua
 local message = comment or post
 if contains(message, 'ping') then
   reply('pong')
