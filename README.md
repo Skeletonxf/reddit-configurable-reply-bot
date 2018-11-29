@@ -12,9 +12,9 @@ The Rust code defines a number of globals for the Lua script:
 - `title` - the title of a post if the Lua script is running on a post
 - `contains(string, substring) -> boolean` - a function that checks for a substring in a string
 - `containsIgnoreCase(string, substring) -> boolean` - the same as `contains` but case insensitive
-- `matchesRegex(string, regex) -> boolean` - a function that checks if the supplied string matches the regex (Rust regex not Lua regex)
+- `matchesRegex(string, regex) -> boolean` - a function that checks if the supplied string matches the regex ([Rust regex](https://docs.rs/regex/0.2.10/regex/#syntax) not Lua regex)
 - `toLowercase(string) -> string` - a function that returns the lowercase version of a string (this is Unicode aware unlike Lua)
-- `reply(string)` - replies to the post/comment (after replying the bot will not invoke your Lua script on this post/comment again if you want to reply multiple times you need to do so in one pass)
+- `reply(string)` - replies to the post/comment (after replying the bot will not invoke your Lua script on this post/comment again, if you want to reply multiple times you need to do so in one pass and not wait to be reran)
 
 Example bot that replies to 'ping' with 'pong' anywhere it sees it (this would be your `behaviour.lua` script).
 ```lua
@@ -24,6 +24,8 @@ if contains(message, 'ping') then
 end
 ```
 That was easy :)
+
+Also you should look over the [Reddit bottiquette](https://www.reddit.com/wiki/bottiquette) before making your bot. This example would surely get your bot banned for spam and is only illustrative.
 
 This repo also contains the legacy python script for the same behavior in the `python legacy` branch. The python script is no longer maintained.
 
@@ -39,7 +41,7 @@ When I first made the Python version of this bot I mainly chose Python because I
 
 ## License
 
-Reddit Configurable Reply Bot / Reddit Sexuality Definition Bot is free software: you can redistribute it and/or modify it under the terms of the GNU General Affero Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+Reddit Configurable Reply Bot / Reddit Sexuality Definition Bot is free software: you can redistribute it and/or modify it under the terms of the GNU General Affero Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. The AGPL is quite restrictive, it requires source code to be made available even if you run your bot from a server to rather than distributing a binary for others to run. Github offers free hosting and you can get started by forking this repository.
 
 (The now unmaintained python version of this project was licensed under the MIT license)
 
