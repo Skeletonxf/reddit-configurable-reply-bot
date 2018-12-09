@@ -31,12 +31,18 @@ function topics.run()
       "What is your favorite thing about being Demisexual? Do you find it easier to relax or focus, are some things more clear to you than to your Allosexual friends?",
     ['November 18, 2018'] = "**Tinder & Bumble & OK Cupid Oh My!**" .. newline ..
       "Dating Apps definitely weren't designed with Demisexual people in mind, even Allosexual people tend to hate them. Do you use them, do you tell people your demisexual on your profile, or do you find little of worth in them?",
-    ['Novemeber 25, 2018'] = "**Separation Of Aesthetic & Sexual Attraction**" .. newline ..
+    ['November 25, 2018'] = "**Separation Of Aesthetic & Sexual Attraction**" .. newline ..
       "The difference between recognizing someone as aesthetically pleasing and actually being sexually attracted to them or not is one of the main tenants of Demisexuality. But sometimes it's hard to discern this difference and other times it slaps you in the face making you think \"Yup, I'm definitely demisexual\". Have you ever had a feeling like this, perhaps this is what first brought you to the idea of being Demi? If so, tell us about it",
     ['December 02, 2018'] = "**Types & Preferences**" .. newline ..
       "Do you have a \"type\" that you prefer or are more innately attracted to? Maybe it's a personality type rather than a physical one, or maybe it's both. Are there certain qualities you look for in a romantic partner? What about qualities you wish to avoid?",
     ['December 09, 2018'] = "**The Birds & The Bees**" .. newline ..
       "What were your feelings when you were taught about sexuality? Did it come from your parents or from an educator? Was your reaction different than it was for others?",
+    ['December 16, 2018'] = "**Game Of Sex**" .. newline ..
+      "Sex scenes can be pretty prevalent in media, be it movies, television or books, etc. How do you feel when you come across these scenes, do you enjoy them, find them boring, skip over them or something else?",
+    ['December 23, 2018'] = "**It's All Coming Up Aces**" .. newline ..
+      "How do you feel about the larger Asexual community (of which Demisexuality is considered to be a subset of), do you have any thoughts about Asexuality in general?",
+    ['December 30, 2018'] = "**Friendship Or Guilt Trip**" .. newline ..
+      'Are you the sort to "catch some feels" for a longstanding friend. And if you do, do you tell them, or do you ignore it? Does it make everything a little brighter and interesting, or does it fill you with guilt and a sense of betrayal? How do you deal with these feelings?',
   }
   for week, topic in pairs(topics) do
     if containsIgnoreCase(title, week) then
