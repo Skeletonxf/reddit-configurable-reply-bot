@@ -61,8 +61,18 @@ impl <'a, 'b> RedditContent<'a, 'b> {
      */
     pub fn body(&self) -> Option<String> {
         match self {
-            &RedditContent::PostComment(comment, _) => Some(comment.body().unwrap()),
-            &RedditContent::SelfPost(post, _) => Some(post.body().unwrap()),
+            &RedditContent::PostComment(comment, _) => Some(
+                // If no comment body return empty string.
+                // This should happen only in unusual circumstances
+                // like deleted comments.
+                comment.body().unwrap_or(String::new())),
+            &RedditContent::SelfPost(post, _) => Some(
+                // If no self post body then return empty string.
+                // The self post that broke the bot prior to
+                // this fix:
+                // https://www.reddit.com/r/demisexuality/comments/9ian5v/do_demisexuals_experience_actual_lust_for_their/
+                post.body().unwrap_or(String::new())),
+                // Link posts are never expected to have a body
             _ => None,
         }
     }
@@ -85,7 +95,8 @@ impl <'a, 'b> RedditContent<'a, 'b> {
      */
     pub fn link_url(&self) -> Option<String> {
         match self {
-             &RedditContent::LinkPost(post, _) => Some(post.link_url().unwrap()),
+             &RedditContent::LinkPost(post, _) => Some(
+                 post.link_url().expect("Failed to get link url of link post")),
              _ => None,
         }
     }
@@ -211,7 +222,7 @@ impl<'c> SubredditCrawler<'c> {
         let about = self.subreddit.about();
         if about.is_ok() {
             println!("{} {} {}", Purple.paint("Subreddit"), self.subreddit.name,
-                    about.unwrap().display_name());
+                    about.expect("Failed to get subreddit about").display_name());
         } else {
             eprintln!("Could not fetch about data in {}", self.subreddit.name);
         }
