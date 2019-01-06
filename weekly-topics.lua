@@ -43,6 +43,11 @@ function topics.run()
       "How do you feel about the larger Asexual community (of which Demisexuality is considered to be a subset of), do you have any thoughts about Asexuality in general?",
     ['December 30, 2018'] = "**Friendship Or Guilt Trip**" .. newline ..
       'Are you the sort to "catch some feels" for a longstanding friend. And if you do, do you tell them, or do you ignore it? Does it make everything a little brighter and interesting, or does it fill you with guilt and a sense of betrayal? How do you deal with these feelings?',
+    -- these two Friendship questions were copied out of order.
+    -- Can't undo the December 30th post so they're going to have to stay
+    -- out of order.
+    ['January 06, 2019'] = "**The Good Ship Friendship**" .. newline ..
+      "Are the friendships you form different than those around you who aren't demisexual? Are they deeper, or more casual, slower to form or quick to bond? Do you form friendships easily or is it a delicate dance where people work their way closer to you?",
   }
   for week, topic in pairs(topics) do
     if containsIgnoreCase(title, week) then
