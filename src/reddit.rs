@@ -227,7 +227,7 @@ impl<'c> SubredditCrawler<'c> {
             eprintln!("Could not fetch about data in {}", self.subreddit.name);
         }
         let hot = self.subreddit.hot(ListingOptions::default())?;
-        for post in hot.take(7) {
+        for post in hot.take(13) {
             println!("Found '{}' in '{}'", post.title(), self.subreddit.name);
             println!();
             self.search_post(post, &behavior)?;
