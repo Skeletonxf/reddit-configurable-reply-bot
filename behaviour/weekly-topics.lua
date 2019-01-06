@@ -1,6 +1,21 @@
 local topics = {}
 
+-- Runs replies to the AutoModerator's weekly topic posts on /r/demisexuality
 function topics.run()
+  -- only do weekly topics in response to moderator bot posts
+  -- so normal users cannot confuse this bot by posting a mock
+  -- weekly discussion
+  local modPost = (post and title) and author == 'AutoModerator'
+  if not modPost then
+    return
+  end
+  local discussionPost = containsIgnoreCase(
+    title, 'Weekly /r/demisexuality discussion thread'
+  )
+  if not discussionPost then
+    return
+  end
+
   print('weekly topic identified')
   local topics = {
     ['August 26, 2018'] = "**The Weird Things Allosexuals Do**" .. newline ..
