@@ -63,6 +63,12 @@ function topics.run()
     -- out of order.
     ['January 06, 2019'] = "**The Good Ship Friendship**" .. newline ..
       "Are the friendships you form different than those around you who aren't demisexual? Are they deeper, or more casual, slower to form or quick to bond? Do you form friendships easily or is it a delicate dance where people work their way closer to you?",
+    ['January 13, 2019'] = "**Friendship Or Guilt Trip**" .. newline ..
+      'Are you the sort to "catch some feels" for a longstanding friend. And if you do, do you tell them, or do you ignore it? Does it make everything a little brighter and interesting, or does it fill you with guilt and a sense of betrayal? How do you deal with these feelings?',
+    ['January 20, 2019'] = "**An Explanation Too Far**" .. newline ..
+      "When talking about Demisexuality, do people ever say \"Oh isn't that how everyone is?\" or perhaps instead \"That's how all girls are right?\", maybe even \"I always want to get to know someone before I date them.\" What do you do when people misunderstand what your trying to say, that demisexuality is about not feeling sexual attraction up to a point, not wanting to take things slow etc… Do you try and explain the different types of attractions, or just go silent? ",
+    ['January 27, 2019'] = "**Touch, I Remember Touch**" .. newline ..
+      "Do you show platonic physical affection with your closest friends? (Not strangers/acquaintances) Do you hug, console, or caress, do you cuddle? If you do, what do you get from it and in what way is it different from a romantic and/or sexual relationship? If you don't, is that sort of a relationship (Often called a QPR (queer platonic relationship)) something you would want?",
   }
   for week, topic in pairs(topics) do
     if containsIgnoreCase(title, week) then
