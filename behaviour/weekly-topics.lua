@@ -69,6 +69,12 @@ function topics.run()
       "When talking about Demisexuality, do people ever say \"Oh isn't that how everyone is?\" or perhaps instead \"That's how all girls are right?\", maybe even \"I always want to get to know someone before I date them.\" What do you do when people misunderstand what your trying to say, that demisexuality is about not feeling sexual attraction up to a point, not wanting to take things slow etc… Do you try and explain the different types of attractions, or just go silent? ",
     ['January 27, 2019'] = "**Touch, I Remember Touch**" .. newline ..
       "Do you show platonic physical affection with your closest friends? (Not strangers/acquaintances) Do you hug, console, or caress, do you cuddle? If you do, what do you get from it and in what way is it different from a romantic and/or sexual relationship? If you don't, is that sort of a relationship (Often called a QPR (queer platonic relationship)) something you would want?",
+    ['February 03, 2019'] = "** Missed Connection**" .. newline ..
+      "Have you ever not been able to tell someone was flirting with someone else, or maybe even hitting on you... all while it was plain as day to your allosexual friends? Is it easier or harder to tell if they're focused on someone else?",
+    ['February 10, 2019'] = "**Don't Read Too Much Into It**" .. newline ..
+      "Has anyone ever mistakingly thought you were interested in them or even being flirtatious with them? Did you tell them you weren't? Did they believe you when you did?",
+    ['February 17, 2019'] = "**Would You Look At That**" .. newline ..
+      "Have family, friends, or romantic interests noticed how your different from themselves and/or others? Have they asked about it? How did you answer them or explain what Demisexual is?",
   }
   for week, topic in pairs(topics) do
     if containsIgnoreCase(title, week) then
