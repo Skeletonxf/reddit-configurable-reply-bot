@@ -75,6 +75,12 @@ function topics.run()
       "Has anyone ever mistakingly thought you were interested in them or even being flirtatious with them? Did you tell them you weren't? Did they believe you when you did?",
     ['February 17, 2019'] = "**Would You Look At That**" .. newline ..
       "Have family, friends, or romantic interests noticed how your different from themselves and/or others? Have they asked about it? How did you answer them or explain what Demisexual is?",
+    ['February 24, 2019'] = "**The Masks That We Wear**" .. newline ..
+      "Do you ever play along with friends and colleagues to get along.  Do you pretend to find others \"sexy\" when others comment about how overtly attractive someone is. Do you play along with people flirting with or touching you, even if you don't want to, so as to avoid embarrassment. How does it make you feel when you do this, do people ever see through the facade you've built?",
+    ['March 03, 2019'] = "**A Romance By Any Other Name**" .. newline ..
+      "Do you enjoy romance stories, be they written, plays, television or film? Do you prefer those that are long and drawn out or the more love at first sight style...?",
+    ['March 10, 2019'] = "**No Sexuality Left Behind**" .. newline ..
+      "What would you do to improve sex-ed in school? Would you talk about different sexualities, genders, and even experimentation? How far should sexual education in school go, is there anything that would be inappropriate to cover?",
   }
   for week, topic in pairs(topics) do
     if containsIgnoreCase(title, week) then

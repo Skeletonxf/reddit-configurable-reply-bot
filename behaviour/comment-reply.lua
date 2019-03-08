@@ -33,13 +33,22 @@ function replies.run()
       end
     end
 
+    -- don't post on the masterpost, blacklist it
+    if askingIfDemi and title then
+      local masterpost = containsIgnoreCase(title, 'Links and Resources Masterpost')
+      local modPost = (post and title) and author == 'skeletonxf'
+      if modPost and masterpost then
+        askingIfDemi = false
+      end
+    end
+
     if askingIfDemi then
       print('Found someone asking if they are demi')
       reply(
         "It looks like you might be asking if you're Demisexual. " ..
         "If so, you've come to the right place!" ..
         newline ..
-        "We have a pinned [Links and Resources Masterpost](https://www.reddit.com/r/demisexuality/comments/8pn8pt/am_i_demi_links_and_resources_masterpost/) " ..
+        "We have a pinned [Links and Resources Masterpost](https://www.reddit.com/r/demisexuality/comments/ayuia1/am_i_demi_links_and_resources_masterpost/) " ..
         "with lots of information which may be helpful to you, such as " ..
         "[Could I be Demisexual](https://web.archive.org/web/20170210212104/http://demisexuality.org/articles/could-i-be-demisexual/) " ..
         "and [Am I Demisexual if](https://web.archive.org/web/20170210210629/http://demisexuality.org/articles/am-i-demisexual-if/)." ..
