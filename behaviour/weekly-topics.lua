@@ -81,6 +81,12 @@ function topics.run()
       "Do you enjoy romance stories, be they written, plays, television or film? Do you prefer those that are long and drawn out or the more love at first sight style...?",
     ['March 10, 2019'] = "**No Sexuality Left Behind**" .. newline ..
       "What would you do to improve sex-ed in school? Would you talk about different sexualities, genders, and even experimentation? How far should sexual education in school go, is there anything that would be inappropriate to cover?",
+    ['March 17, 2019'] = "**Last Stop, Everybody Out Of The Closet**" .. newline ..
+      "What would you do to improve sex-ed in school? Would you talk about different sexualities, genders, and even experimentation? How far should sexual education in school go, is there anything that would be inappropriate to cover?",
+    ['March 24, 2019'] = "**Poppycock, Balderdash & Twaddle**" .. newline ..
+      "Some say that the word Demisexual is just made up, created by a teenager on a now defunct RP forum in 2006. Does that matter to you? Does it make your feelings any more or less real if it was?",
+    ['March 31, 2019'] = "**Bonafide, Certified, Grade-A Demisexual**" .. newline ..
+      "If there was a proven and infallible test you could take that could prove you either were or were not Demisexual, would you take it? What if the test said you weren't? Since there isn't such a test, would you like there to be?",
   }
   for week, topic in pairs(topics) do
     if containsIgnoreCase(title, week) then
