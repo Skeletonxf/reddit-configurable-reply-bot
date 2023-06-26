@@ -1,5 +1,7 @@
 # reddit-configurable-reply-bot
 
+**WARNING: The core idea of configuring a reddit bot in Lua remains, but rawr is unmaintained so this code base needs major changes before use.**
+
 ## A Rust bot for writing reddit bots in Lua.
 
 This repository contains a Rust bot to interact with reddit. The Rust code is highly configurable from a Lua script to control the reply behaviour, though the Rust code may not be high quality as I am still learning Rust. The bot scans a whitelisted list of subreddits, and only attempts to reply to a comment if it has not replied to it before. The `behavior.lua` script handles the logic of replying on this more abstract level of dealing with a single comment or  post, and calling `reply` if wanted.
